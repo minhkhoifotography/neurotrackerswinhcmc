@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Wellness & Cognitive Assessment</title>
     
-    <!-- Firebase SDK (Version 8) -->
+    <!-- Firebase SDK (Version 8 compat) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
-    <!-- Chart.js for data visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        /* GIỮ NGUYÊN TOÀN BỘ CSS GỐC */
+        /* TOÀN BỘ CSS GỐC */
         :root {
-            --primary: #2563eb; 
+            --primary: #2563eb;
             --primary-dark: #1e40af;
-            --secondary: #0f766e; 
+            --secondary: #0f766e;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
@@ -33,26 +30,15 @@
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; line-height: 1.5; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         header { background: #1e293b; color: white; padding: 24px; margin-bottom: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .logo { display: flex; align-items: center; gap: 16px; }
         .logo-icon { width: 48px; height: 48px; background: var(--secondary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .logo h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
         .logo p { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Nav & User Auth Styles */
         nav { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         nav button { background: transparent; border: 1px solid transparent; color: #cbd5e1; cursor: pointer; padding: 8px 16px; border-radius: 6px; transition: all 0.2s; font-size: 14px; font-weight: 500; }
         nav button:hover { background: rgba(255,255,255,0.1); color: white; }
         nav button.active { background: var(--primary); color: white; border-color: var(--primary-dark); }
-        
-        .auth-section { display: flex; align-items: center; gap: 12px; margin-left: auto; border-left: 1px solid #334155; padding-left: 16px; }
-        .auth-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
-        .auth-btn:hover { background: var(--primary-dark); }
-        .logout-btn { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); }
-        .user-email-display { font-size: 13px; color: #cbd5e1; }
-
-        /* General Layout */
         .main-content { background: var(--card-bg); border-radius: 16px; padding: 32px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025); border: 1px solid var(--border); }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 32px; }
         .stat-card { padding: 24px; border-radius: 12px; position: relative; overflow: hidden; border: 1px solid var(--border); background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -65,53 +51,105 @@
         .section { margin-bottom: 32px; }
         .section h2 { font-size: 22px; font-weight: 600; margin-bottom: 20px; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .empty-state { padding: 40px; text-align: center; background: var(--bg-color); border-radius: 8px; border: 1px dashed #cbd5e1; }
+        .empty-state-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
         .empty-state-text { color: var(--text-muted); font-size: 15px; margin-bottom: 20px; }
-        
-        /* Lists & Buttons */
         .challenge-list { display: flex; flex-direction: column; gap: 12px; }
         .challenge-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); transition: all 0.2s; }
+        .challenge-item:hover { border-color: #94a3b8; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
         .challenge-item.completed { background: #f0fdf4; border-color: #bbf7d0; }
         .challenge-name { font-weight: 600; color: var(--text-main); font-size: 15px; }
         .challenge-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .challenge-item.completed .challenge-name { color: var(--success); }
         .challenge-points { color: var(--secondary); font-weight: 600; font-size: 14px; background: #ccfbf1; padding: 4px 10px; border-radius: 20px; }
         .btn-complete { padding: 8px 16px; background: var(--bg-color); border: 1px solid var(--border); color: var(--text-main); border-radius: 6px; font-weight: 500; font-size: 13px; cursor: pointer; transition: all 0.2s; }
         .btn-complete:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        /* Survey Styling */
+        .survey-container { max-width: 700px; margin: 0 auto; }
+        .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 32px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.4s ease; }
+        .question { font-size: 20px; font-weight: 500; line-height: 1.4; margin-bottom: 32px; color: var(--text-main); }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { padding: 16px 24px; background: var(--card-bg); border: 1px solid #cbd5e1; border-radius: 8px; text-align: left; cursor: pointer; transition: all 0.2s ease; font-size: 15px; display: flex; align-items: center; color: var(--text-main); }
+        .option-btn::before { content: ''; display: inline-block; width: 18px; height: 18px; border: 2px solid #cbd5e1; border-radius: 50%; margin-right: 16px; transition: all 0.2s; }
+        .option-btn:hover { border-color: #94a3b8; background: var(--bg-color); }
+        .option-btn.selected { border-color: var(--primary); background: #eff6ff; }
+        .option-btn.selected::before { border-color: var(--primary); background: var(--primary); box-shadow: inset 0 0 0 3px #eff6ff; }
+        .survey-navigation { display: flex; justify-content: space-between; gap: 16px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+        .survey-nav-btn { padding: 12px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .survey-nav-btn.prev { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); }
+        .survey-nav-btn.next { background: var(--primary); color: white; min-width: 140px; }
+        .survey-nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .result-container { text-align: center; padding: 40px 20px; background: var(--bg-color); border-radius: 12px; border: 1px solid var(--border); }
+        .result-score { width: 120px; height: 120px; margin: 0 auto 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 700; border: 4px solid; }
+        .result-score.high { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
+        .result-score.medium { border-color: var(--warning); color: var(--warning); background: #fffbeb; }
+        .result-score.low { border-color: var(--success); color: var(--success); background: #f0fdf4; }
+        
+        /* Tracker & Resources Styling */
+        .tracker-container { max-width: 600px; margin: 0 auto; }
+        .tracker-item { margin-bottom: 24px; background: var(--bg-color); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .tracker-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .tracker-label { font-weight: 600; color: var(--text-main); font-size: 15px; }
+        .tracker-value { font-size: 16px; font-weight: 600; color: var(--primary); }
+        .slider { width: 100%; height: 6px; background: #cbd5e1; border-radius: 3px; outline: none; -webkit-appearance: none; appearance: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: white; border: 2px solid var(--primary); border-radius: 50%; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .total-time { margin-top: 32px; padding: 24px; background: #1e293b; border-radius: 8px; color: white; text-align: center; }
+        .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+        .resource-card { padding: 24px; border-radius: 8px; background: var(--bg-color); border: 1px solid var(--border); }
+        .resource-card h3 { font-size: 16px; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .resource-list { list-style: none; }
+        .resource-list li { margin-bottom: 10px; padding-left: 20px; position: relative; font-size: 14px; color: var(--text-muted); }
+        .resource-list li:before { content: "•"; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
         .btn-primary { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-start { padding: 10px 20px; background: white; color: var(--text-main); border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 13px; }
-        
-        /* Quick Actions & Trackers */
+        .btn-start:hover { background: var(--bg-color); border-color: #94a3b8; }
+        .hidden { display: none !important; }
         .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .action-btn { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: white; text-align: left; }
+        .action-btn { display: flex; align-items: center; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: left; background: white; font-family: inherit; }
         .action-btn:hover { border-color: var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .action-icon { font-size: 24px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--bg-color); border-radius: 8px; }
-        .action-title { font-weight: 600; font-size: 15px; color: var(--text-main); }
+        .action-title { font-weight: 600; font-size: 15px; color: var(--text-main); margin-bottom: 2px; }
         .action-desc { font-size: 13px; color: var(--text-muted); }
-        
-        /* Modals & Inputs */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
         .modal-content { background: white; border-radius: 12px; padding: 32px; max-width: 480px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
-        .modal-title { font-size: 18px; font-weight: 600; }
-        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; }
+        .modal-title { font-size: 18px; font-weight: 600; color: var(--text-main); }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; transition: color 0.2s; }
+        .modal-close:hover { color: var(--text-main); }
         .input-group { margin-bottom: 16px; }
-        .input-label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; }
-        .input-field { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; }
+        .input-label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: var(--text-main); }
+        .input-field { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; transition: all 0.2s; }
+        .input-field:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .guide-section { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
+        .guide-section h3 { margin-bottom: 12px; font-size: 18px; }
+        .guide-section p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+        .step-list { display: flex; flex-direction: column; gap: 12px; }
+        .step-item { display: flex; gap: 16px; background: var(--bg-color); padding: 16px; border-radius: 8px; border: 1px solid var(--border); }
+        .step-number { width: 32px; height: 32px; border-radius: 50%; background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .step-content strong { display: block; margin-bottom: 4px; color: var(--text-main); }
+        .step-content p { margin: 0; font-size: 13px; }
 
-        /* Admin Dashboard Styles */
+        /* FIREBASE ADDITIONS STYLES */
+        .auth-section { display: flex; align-items: center; gap: 12px; margin-left: auto; padding-left: 16px; border-left: 1px solid #334155;}
+        .auth-btn { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
+        .auth-btn:hover { background: var(--primary-dark); }
+        .logout-btn { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .logout-btn:hover { background: rgba(239, 68, 68, 0.1); }
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .admin-table th, .admin-table td { border: 1px solid var(--border); padding: 12px; text-align: left; font-size: 14px; }
         .admin-table th { background-color: var(--bg-color); font-weight: 600; color: var(--text-muted); }
-        .admin-table tr:hover { background-color: #f8fafc; }
-
-        .hidden { display: none !important; }
-        .tracker-container { max-width: 600px; margin: 0 auto; }
-        .tracker-item { margin-bottom: 24px; background: var(--bg-color); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); }
-        .tracker-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-        .slider { width: 100%; height: 6px; background: #cbd5e1; border-radius: 3px; outline: none; -webkit-appearance: none; appearance: none; }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: white; border: 2px solid var(--primary); border-radius: 50%; cursor: pointer; }
+        
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 16px; align-items: flex-start; }
+            nav { width: 100%; }
+            .auth-section { margin-left: 0; padding-left: 0; border-left: none; width: 100%; justify-content: space-between; margin-top: 10px;}
+        }
     </style>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -126,18 +164,23 @@
                 </div>
                 <nav>
                     <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+                    <button class="nav-btn" data-view="survey">Assessment</button>
                     <button class="nav-btn" data-view="tracker">Tracker</button>
+                    <button class="nav-btn" data-view="guide">Clinical Guide</button>
                     <button class="nav-btn" data-view="challenges">Interventions</button>
-                    <!-- Admin Button (Hidden by default) -->
-                    <button id="nav-admin" class="nav-btn hidden" data-view="admin" style="color: #f59e0b; border-color: #f59e0b;">Admin Panel</button>
+                    <button class="nav-btn" data-view="resources">Resources</button>
                     
+                    <!-- NÚT ADMIN (Chỉ hiện khi là Admin) -->
+                    <button class="nav-btn hidden" id="nav-admin" data-view="admin" style="color: #f59e0b; border-color: #f59e0b; background: rgba(245, 158, 11, 0.1);">Admin Panel</button>
+
+                    <!-- AUTHENTICATION UI -->
                     <div class="auth-section">
-                        <!-- Logged Out State -->
-                        <button id="btn-show-login" class="auth-btn" onclick="document.getElementById('authModal').classList.add('show')">Login / Register</button>
+                        <!-- Trạng thái chưa đăng nhập -->
+                        <button id="btn-show-login" class="auth-btn" onclick="document.getElementById('authModal').classList.add('show')">Cloud Sync / Login</button>
                         
-                        <!-- Logged In State -->
+                        <!-- Trạng thái đã đăng nhập -->
                         <div id="user-profile" class="hidden" style="display: flex; align-items: center; gap: 12px;">
-                            <span id="user-email-display" class="user-email-display">user@email.com</span>
+                            <span id="user-email-display" style="font-size: 13px; color: #cbd5e1;"></span>
                             <button class="logout-btn" onclick="logoutUser()">Logout</button>
                         </div>
                     </div>
@@ -145,13 +188,14 @@
             </div>
         </header>
 
-        <!-- Auth Modal -->
+        <!-- AUTH MODAL -->
         <div id="authModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title" id="auth-title">Login to Firebase</h2>
+                    <h2 class="modal-title">Firebase Authentication</h2>
                     <button class="modal-close" onclick="document.getElementById('authModal').classList.remove('show')">×</button>
                 </div>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Đăng nhập để đồng bộ dữ liệu Real-time lên Firebase. Dữ liệu offline vẫn được giữ lại.</p>
                 <div class="input-group">
                     <label class="input-label">Email</label>
                     <input type="email" id="auth-email" class="input-field" placeholder="your@email.com">
@@ -162,57 +206,48 @@
                 </div>
                 <div id="auth-error" style="color: var(--danger); font-size: 13px; margin-bottom: 16px; display: none;"></div>
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button class="btn-primary" style="flex: 1;" onclick="loginUser()">Login</button>
-                    <button class="btn-start" style="flex: 1;" onclick="registerUser()">Register</button>
+                    <button class="btn-primary" style="flex: 1;" onclick="loginUser()">Đăng Nhập</button>
+                    <button class="btn-start" style="flex: 1;" onclick="registerUser()">Đăng Ký</button>
                 </div>
             </div>
         </div>
 
         <div class="main-content">
-            <!-- Overlay when not logged in -->
-            <div id="login-overlay" style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-                <h2>Authentication Required</h2>
-                <p style="color: var(--text-muted); margin: 12px 0 24px;">Please login to sync and save your cognitive health data in real-time.</p>
-                <button class="btn-primary" onclick="document.getElementById('authModal').classList.add('show')">Login to Continue</button>
-            </div>
-
             <!-- Dashboard View -->
-            <div id="dashboard-view" class="view hidden">
+            <div id="dashboard-view" class="view">
                 <h2>Overview Dashboard</h2>
+                <div id="sync-status" style="font-size: 12px; color: var(--warning); margin-bottom: 16px;">⚠️ Data is stored locally. Login to sync with Firebase.</div>
+                
                 <div class="quick-actions">
+                    <button class="action-btn" onclick="switchView('survey')">
+                        <span class="action-icon">📋</span>
+                        <div><div class="action-title">Take Assessment</div><div class="action-desc">Check Cognitive Load Score</div></div>
+                    </button>
                     <button class="action-btn" onclick="showDailyInput()">
                         <span class="action-icon">⏱️</span>
-                        <div>
-                            <div class="action-title">Log Daily Data</div>
-                            <div class="action-desc">Update screen time</div>
-                        </div>
+                        <div><div class="action-title">Log Daily Data</div><div class="action-desc">Update screen time</div></div>
                     </button>
                     <button class="action-btn" onclick="switchView('challenges')">
                         <span class="action-icon">🛡</span>
-                        <div>
-                            <div class="action-title">Interventions</div>
-                            <div class="action-desc">Healthy habit building</div>
-                        </div>
+                        <div><div class="action-title">Interventions</div><div class="action-desc">Healthy habit building</div></div>
                     </button>
                 </div>
                 
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <button onclick="exportAllData()" class="btn-start" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px;">📥 Export Data</button>
+                    <button onclick="switchView('resources')" class="btn-start" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px;">⚙️ Manage Data</button>
+                </div>
+                
+                <div id="history-summary" style="display: none; background: var(--bg-color); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px; font-size: 16px;">Last 7 Days History</h3>
+                    <div id="history-content"></div>
+                    <button onclick="clearHistory()" style="margin-top: 16px; padding: 6px 12px; background: white; border: 1px solid var(--danger); color: var(--danger); border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s;">Clear History</button>
+                </div>
+                
                 <div class="stats-grid">
-                    <div class="stat-card primary">
-                        <div class="stat-label">Cognitive Fatigue Score</div>
-                        <div class="stat-value" id="brain-score">--</div>
-                        <div class="stat-desc" id="brain-desc">Not assessed yet</div>
-                    </div>
-                    <div class="stat-card secondary">
-                        <div class="stat-label">Wellness Points</div>
-                        <div class="stat-value" id="total-points">0</div>
-                        <div class="stat-desc">Complete interventions to earn</div>
-                    </div>
-                    <div class="stat-card tertiary">
-                        <div class="stat-label">Today's Usage</div>
-                        <div class="stat-value" id="today-time">--</div>
-                        <div class="stat-desc" id="today-desc">No data logged today</div>
-                    </div>
+                    <div class="stat-card primary"><div class="stat-label">Cognitive Fatigue Score</div><div class="stat-value" id="brain-score">--</div><div class="stat-desc" id="brain-desc">Not assessed yet</div></div>
+                    <div class="stat-card secondary"><div class="stat-label">Wellness Points</div><div class="stat-value" id="total-points">0</div><div class="stat-desc">Complete interventions to earn</div></div>
+                    <div class="stat-card tertiary"><div class="stat-label">Today's Usage</div><div class="stat-value" id="today-time">--</div><div class="stat-desc" id="today-desc">No data logged today</div></div>
                 </div>
 
                 <div class="section">
@@ -221,34 +256,112 @@
                 </div>
 
                 <div class="section">
+                    <h2>Weekly Statistics</h2>
+                    <div id="weekly-stats"></div>
+                </div>
+
+                <div class="section">
                     <h2>Analytics & Distribution</h2>
-                    <div id="charts-container">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-                            <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;">
-                                <canvas id="barChart"></canvas>
-                            </div>
-                            <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;">
-                                <canvas id="pieChart"></canvas>
-                            </div>
+                    <div id="charts-container"></div>
+                </div>
+            </div>
+
+            <!-- Survey View (NGUYÊN BẢN 100%) -->
+            <div id="survey-view" class="view hidden">
+                <div class="survey-container">
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">Digital Cognitive Assessment</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">Please answer the following diagnostic questions honestly to evaluate your current digital dependency load.</p>
+                    
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 14%"></div></div>
+                    
+                    <div id="question-container">
+                        <div class="question" id="question-text">Loading question...</div>
+                        <div class="options" id="options-container"></div>
+                        <div class="survey-navigation" id="survey-navigation">
+                            <button class="survey-nav-btn prev" id="prev-question" onclick="goToPreviousQuestion()">Back</button>
+                            <button class="survey-nav-btn next" id="next-question" onclick="goToNextQuestion()">Next Question</button>
+                        </div>
+                    </div>
+                    
+                    <div id="result-container" class="result-container hidden"></div>
+                </div>
+            </div>
+
+            <!-- Guide View (NGUYÊN BẢN 100%) -->
+            <div id="guide-view" class="view hidden">
+                <h2>Clinical Reference Guide</h2>
+                <div class="guide-container">
+                    <div class="guide-section">
+                        <h3>System Overview</h3>
+                        <p>The Digital Wellness Tracker is designed to systematically measure, monitor, and mitigate cognitive fatigue associated with prolonged digital consumption.</p>
+                        <div class="step-list">
+                            <div class="step-item"><div class="step-number">1</div><div class="step-content"><strong>Baseline Assessment</strong><p>Complete the Digital Cognitive Assessment...</p></div></div>
+                            <div class="step-item"><div class="step-number">2</div><div class="step-content"><strong>Daily Tracking</strong><p>Log your screen time across platforms accurately...</p></div></div>
+                            <div class="step-item"><div class="step-number">3</div><div class="step-content"><strong>Behavioral Interventions</strong><p>Engage in the recommended "Interventions"...</p></div></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Admin View (Exclusive) -->
+            <!-- Tracker View (NGUYÊN BẢN ĐẦY ĐỦ 5 SLIDERS) -->
+            <div id="tracker-view" class="view hidden">
+                <h2>Screen Time Tracker</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Adjust the sliders to log your estimated consumption hours for today.</p>
+                <div class="tracker-container">
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Facebook</span><span class="tracker-value" id="fb-value">0h</span></div><input type="range" class="slider" id="fb-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Instagram</span><span class="tracker-value" id="ig-value">0h</span></div><input type="range" class="slider" id="ig-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">TikTok</span><span class="tracker-value" id="tt-value">0h</span></div><input type="range" class="slider" id="tt-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">YouTube</span><span class="tracker-value" id="yt-value">0h</span></div><input type="range" class="slider" id="yt-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Twitter / X</span><span class="tracker-value" id="tw-value">0h</span></div><input type="range" class="slider" id="tw-slider" min="0" max="10" step="0.5" value="0"></div>
+                    
+                    <div class="total-time">
+                        <h3 style="font-weight: 500;">Total Screen Time: <span id="total-time" style="font-weight: 700; font-size: 24px;">0</span>h</h3>
+                        <p id="time-warning" style="margin-top: 8px; font-size: 14px; color: #94a3b8;">Move the sliders to begin tracking</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="btn-primary" onclick="saveTrackerData()">Save Today's Log</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interventions View (NGUYÊN BẢN) -->
+            <div id="challenges-view" class="view hidden">
+                <h2>Clinical Interventions</h2>
+                <div class="challenge-list" id="all-challenges"></div>
+                <div style="margin-top: 32px; padding: 32px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+                    <h3 style="font-size: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Cumulative Wellness Points</h3>
+                    <p style="font-size: 48px; font-weight: 700; color: var(--primary); margin: 8px 0;" id="challenge-points">0</p>
+                </div>
+            </div>
+
+            <!-- Resources & Data Management View (NGUYÊN BẢN) -->
+            <div id="resources-view" class="view hidden">
+                <h2>Resources & Support (Data Management)</h2>
+                <div class="section" style="border-top: 2px solid var(--border); padding-top: 32px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
+                            <h4 style="font-size: 16px; margin-bottom: 8px;">Export Data</h4>
+                            <button onclick="exportAllData()" style="width: 100%; padding: 10px; border: 1px solid var(--success); color: var(--success); border-radius: 6px; cursor: pointer; margin-bottom: 8px;">📥 Export JSON</button>
+                            <button onclick="exportToCSV()" style="width: 100%; padding: 10px; border: 1px solid var(--primary); color: var(--primary); border-radius: 6px; cursor: pointer;">📊 Export CSV</button>
+                        </div>
+                        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
+                            <h4 style="font-size: 16px; margin-bottom: 8px;">Import Data (Support 200 Students Dataset)</h4>
+                            <input type="file" id="importFile" accept=".json,.csv" style="display: none;" onchange="importData(this.files[0])">
+                            <button onclick="document.getElementById('importFile').click()" style="width: 100%; padding: 10px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 6px; cursor: pointer;">📂 Select File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MỚI: ADMIN VIEW -->
             <div id="admin-view" class="view hidden">
-                <h2>Admin Console - System Data Overview</h2>
-                <p style="color: var(--text-muted); margin-bottom: 24px;">Real-time database records of all registered users.</p>
+                <h2>Admin Console - Real-time System Data</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Dữ liệu hiển thị trực tiếp từ Firebase Firestore.</p>
                 
                 <div class="stats-grid" style="margin-bottom: 24px;">
-                    <div class="stat-card primary">
-                        <div class="stat-label">Total Users</div>
-                        <div class="stat-value" id="admin-total-users">0</div>
-                    </div>
-                    <div class="stat-card secondary">
-                        <div class="stat-label">Avg System Points</div>
-                        <div class="stat-value" id="admin-avg-points">0</div>
-                    </div>
+                    <div class="stat-card primary"><div class="stat-label">Total Registered Users</div><div class="stat-value" id="admin-total-users">0</div></div>
+                    <div class="stat-card secondary"><div class="stat-label">Average Wellness Points</div><div class="stat-value" id="admin-avg-points">0</div></div>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -258,62 +371,53 @@
                                 <th>User Email</th>
                                 <th>Total Points</th>
                                 <th>Brain Score</th>
-                                <th>Latest Log (h)</th>
+                                <th>Latest Usage (h)</th>
                                 <th>History Entries</th>
-                                <th>Last Updated</th>
+                                <th>Last Sync Date</th>
                             </tr>
                         </thead>
                         <tbody id="admin-table-body">
-                            <!-- Populated by JS -->
+                            <!-- JS sẽ điền dữ liệu Firebase vào đây -->
                         </tbody>
                     </table>
                 </div>
             </div>
-
-            <!-- Tracker View -->
-            <div id="tracker-view" class="view hidden">
-                <h2>Screen Time Tracker</h2>
-                <div class="tracker-container">
-                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Facebook</span><span class="tracker-value" id="fb-value">0h</span></div><input type="range" class="slider" id="fb-slider" min="0" max="10" step="0.5" value="0"></div>
-                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Instagram</span><span class="tracker-value" id="ig-value">0h</span></div><input type="range" class="slider" id="ig-slider" min="0" max="10" step="0.5" value="0"></div>
-                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">TikTok</span><span class="tracker-value" id="tt-value">0h</span></div><input type="range" class="slider" id="tt-slider" min="0" max="10" step="0.5" value="0"></div>
-                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">YouTube</span><span class="tracker-value" id="yt-value">0h</span></div><input type="range" class="slider" id="yt-slider" min="0" max="10" step="0.5" value="0"></div>
-                    
-                    <div style="text-align: center; margin-top: 24px;">
-                        <h3 style="font-weight: 500; margin-bottom: 12px;">Total Screen Time: <span id="total-time" style="font-weight: 700; font-size: 24px;">0</span>h</h3>
-                        <button class="btn-primary" onclick="saveTrackerData()">Save to Firebase</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Interventions View -->
-            <div id="challenges-view" class="view hidden">
-                <h2>Clinical Interventions</h2>
-                <div class="challenge-list" id="all-challenges"></div>
-            </div>
         </div>
     </div>
 
-    <!-- Daily Input Modal -->
+    <!-- Daily Input Modal (NGUYÊN BẢN 5 INPUTS) -->
     <div id="dailyModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Log Daily Usage</h2>
-                <button class="modal-close" onclick="document.getElementById('dailyModal').classList.remove('show')">×</button>
+                <button class="modal-close" onclick="closeDailyModal()">×</button>
             </div>
-            <div class="input-group"><label class="input-label">Date</label><input type="date" id="input-date" class="input-field"></div>
-            <div class="input-group"><label class="input-label">Facebook (h)</label><input type="number" id="input-fb" class="input-field" min="0"></div>
-            <div class="input-group"><label class="input-label">TikTok (h)</label><input type="number" id="input-tt" class="input-field" min="0"></div>
-            <div class="input-group"><label class="input-label">YouTube (h)</label><input type="number" id="input-yt" class="input-field" min="0"></div>
-            <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="saveDailyData()">Save Record</button>
+            <div class="input-group"><label class="input-label">Date</label><input type="date" id="input-date" class="input-field" value=""></div>
+            <div class="input-group"><label class="input-label">Facebook (hours)</label><input type="number" id="input-facebook" class="input-field" min="0"></div>
+            <div class="input-group"><label class="input-label">Instagram (hours)</label><input type="number" id="input-instagram" class="input-field" min="0"></div>
+            <div class="input-group"><label class="input-label">TikTok (hours)</label><input type="number" id="input-tiktok" class="input-field" min="0"></div>
+            <div class="input-group"><label class="input-label">YouTube (hours)</label><input type="number" id="input-youtube" class="input-field" min="0"></div>
+            <div class="input-group"><label class="input-label">Twitter / X (hours)</label><input type="number" id="input-twitter" class="input-field" min="0"></div>
+            
+            <div style="background: var(--bg-color); padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500; font-size: 14px;">Total Logged Time:</span>
+                    <span id="modal-total-time" style="font-size: 20px; font-weight: 600; color: var(--primary);">0h</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button class="btn-primary" onclick="saveDailyData()" style="flex: 2;">Save Record</button>
+                <button onclick="closeDailyModal()" class="btn-start" style="flex: 1;">Cancel</button>
+            </div>
         </div>
     </div>
 
     <script>
         // ==========================================
         // 1. FIREBASE CONFIGURATION
-        // YÊU CẦU: Thay thế đoạn config này bằng Config trong Firebase Console của bạn
         // ==========================================
+        // THAY THẾ CONFIG NÀY BẰNG CONFIG TRONG FIREBASE CỦA BẠN
         const firebaseConfig = {
           apiKey: "AIzaSyCEtd3iJxZNry_S6MTwRO9OBdEzWA51DZY",
           authDomain: "neurotracker-swinburnehcmc.firebaseapp.com",
@@ -324,254 +428,150 @@
           measurementId: "G-3ZQPGBF1M4"
         };
 
-        // Initialize Firebase
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const auth = firebase.auth();
         const db = firebase.firestore();
-
-        // ==========================================
-        // 2. SYSTEM STATE & VARIABLES
-        // ==========================================
-        const ADMIN_EMAIL = "creative.michaelproduktion@gmail.com"; // <-- Đặt email Admin của bạn ở đây
         
+        // ADMIN EMAIL CONFIG
+        const ADMIN_EMAIL = "creative.michaelproduktion@gmail.com"; // Đổi thành email của bạn
         let currentUser = null;
         let isAdmin = false;
-        let activeCharts = {};
-        
-        // App Data Structure
-        let appData = {
-            totalPoints: 0,
-            brainRotScore: null,
-            todayUsage: null,
-            platformHistory: [], // Array to hold timeline data
-            challenges: [
-                { id: 1, name: '1-Hour Digital Fast', completed: false, points: 10 },
-                { id: 2, name: 'Analog Reading', completed: false, points: 15 },
-                { id: 3, name: 'Mindfulness Session', completed: false, points: 5 }
-            ]
-        };
 
         // ==========================================
-        // 3. AUTHENTICATION LOGIC
+        // 2. ORIGINAL SYSTEM STATE VARIABLES
+        // ==========================================
+        let currentView = 'dashboard';
+        let surveyStep = 0;
+        let surveyAnswers = {};
+        let totalPoints = 0;
+        let brainRotScore = null;
+        let todayUsage = null;
+        let weeklyData = [];
+        let hasData = false;
+        let activeCharts = {};
+
+        const challenges = [
+            { id: 1, name: '1-Hour Digital Fast', subtitle: 'Disable all non-essential notifications.', completed: false, points: 10 },
+            { id: 2, name: 'Analog Reading', subtitle: 'Read 30 minutes of physical printed material.', completed: false, points: 15 },
+            { id: 3, name: 'Mindfulness Session', subtitle: 'Complete 10 minutes of guided breathing.', completed: false, points: 5 },
+            { id: 4, name: 'Sleep Hygiene Reset', subtitle: 'No devices 60 minutes before bedtime.', completed: false, points: 20 },
+            { id: 5, name: 'Physical Activation', subtitle: '20 minutes of physical exercise.', completed: false, points: 15 }
+        ];
+
+        const surveyQuestions = [
+            { question: "Sustained Attention: I find it difficult to focus on long-form media...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Overstimulation Dependency: I require multiple streams of stimulation...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Time Dysmorphia: I engage in 'infinite scrolling' longer than I intended...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Cognitive Fog: I experience mental exhaustion after social media...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Digital Echolalia: Internet slang intrudes into my internal thoughts...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Withdrawal Anxiety: I experience restlessness when separated from devices...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Sleep Displacement: I sacrifice planned sleep hours to consume content...", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] }
+        ];
+
+        // ==========================================
+        // 3. FIREBASE AUTH & SYNC LOGIC
         // ==========================================
         auth.onAuthStateChanged(user => {
             if (user) {
-                // LOGGED IN
                 currentUser = user;
                 isAdmin = (user.email === ADMIN_EMAIL);
                 
                 document.getElementById('btn-show-login').classList.add('hidden');
-                document.getElementById('user-profile').style.display = 'flex';
                 document.getElementById('user-profile').classList.remove('hidden');
                 document.getElementById('user-email-display').textContent = user.email;
-                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('sync-status').innerHTML = '<span style="color: var(--success);">✓ Syncing real-time to Firebase as ' + user.email + '</span>';
                 
-                if(isAdmin) {
-                    document.getElementById('nav-admin').classList.remove('hidden');
-                } else {
-                    document.getElementById('nav-admin').classList.add('hidden');
-                }
-
-                // Load User Data from Firestore
-                loadUserData();
-                switchView(isAdmin ? 'admin' : 'dashboard');
+                if(isAdmin) document.getElementById('nav-admin').classList.remove('hidden');
                 
+                syncFromFirebase(); // Kéo dữ liệu từ Cloud về máy
             } else {
-                // LOGGED OUT
                 currentUser = null;
                 isAdmin = false;
-                
                 document.getElementById('btn-show-login').classList.remove('hidden');
                 document.getElementById('user-profile').classList.add('hidden');
-                document.getElementById('user-profile').style.display = 'none';
+                document.getElementById('sync-status').innerHTML = '⚠️ Data is stored locally. Login to sync with Firebase.';
                 document.getElementById('nav-admin').classList.add('hidden');
-                
-                // Hide all views and show Login Overlay
-                document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-                document.getElementById('login-overlay').classList.remove('hidden');
             }
         });
 
         function loginUser() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-password').value;
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => document.getElementById('authModal').classList.remove('show'))
-                .catch(err => document.getElementById('auth-error').style.display = 'block').innerText = err.message;
+            auth.signInWithEmailAndPassword(email, pass).then(() => {
+                document.getElementById('authModal').classList.remove('show');
+            }).catch(err => document.getElementById('auth-error').style.display = 'block').innerText = err.message;
         }
 
         function registerUser() {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-password').value;
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(cred => {
-                    // Initialize empty user doc in Firestore
-                    return db.collection('users').doc(cred.user.uid).set({
-                        email: email,
-                        data: appData,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(() => document.getElementById('authModal').classList.remove('show'))
-                .catch(err => document.getElementById('auth-error').style.display = 'block').innerText = err.message;
+            auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+                document.getElementById('authModal').classList.remove('show');
+                // Đẩy dữ liệu local hiện tại lên tài khoản mới
+                syncToFirebase();
+            }).catch(err => document.getElementById('auth-error').style.display = 'block').innerText = err.message;
         }
 
-        function logoutUser() {
-            auth.signOut();
-        }
+        function logoutUser() { auth.signOut(); }
 
-        // ==========================================
-        // 4. DATABASE SYNC (FIRESTORE)
-        // ==========================================
-        function loadUserData() {
-            if (!currentUser) return;
+        function syncToFirebase() {
+            if(!currentUser) return; // Nếu chưa đăng nhập thì không làm gì (chỉ lưu local)
             
-            db.collection('users').doc(currentUser.uid).get().then(doc => {
-                if (doc.exists && doc.data().data) {
-                    appData = doc.data().data; // Overwrite local state with cloud state
-                }
-                updateDashboard();
-                if(isAdmin) loadAdminData();
-            }).catch(err => console.error("Error loading data:", err));
-        }
-
-        function saveUserDataToFirebase() {
-            if (!currentUser) return;
-            // Write to Firestore Realtime
-            db.collection('users').doc(currentUser.uid).set({
-                data: appData,
-                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true })
-            .then(() => console.log("Data synced to Firestore!"))
-            .catch(err => console.error("Sync error:", err));
-        }
-
-        // ==========================================
-        // 5. APP LOGIC & UI UPDATES
-        // ==========================================
-        function switchView(view) {
-            if(!currentUser && view !== 'dashboard') return; // Guard clause
-            
-            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-            document.getElementById(`${view}-view`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`[data-view="${view}"]`);
-            if(activeBtn) activeBtn.classList.add('active');
-            
-            if (view === 'dashboard') updateDashboard();
-            if (view === 'challenges') renderChallenges();
-            if (view === 'admin' && isAdmin) loadAdminData();
-        }
-
-        function updateDashboard() {
-            document.getElementById('total-points').textContent = appData.totalPoints;
-            document.getElementById('today-time').textContent = appData.todayUsage ? appData.todayUsage + 'h' : '--';
-            document.getElementById('brain-score').textContent = appData.brainRotScore ? appData.brainRotScore + '%' : '--';
-            
-            // Render Dashboard Challenges
-            const container = document.getElementById('dashboard-challenges');
-            container.innerHTML = '';
-            appData.challenges.forEach(challenge => {
-                const item = document.createElement('div');
-                item.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
-                item.innerHTML = `<div><span class="challenge-name">${challenge.name}</span></div><span class="challenge-points">+${challenge.points}pts</span>`;
-                container.appendChild(item);
-            });
-
-            setTimeout(drawCharts, 200); // Small delay for Canvas render
-        }
-
-        function renderChallenges() {
-            const container = document.getElementById('all-challenges');
-            container.innerHTML = '';
-            appData.challenges.forEach(challenge => {
-                const item = document.createElement('div');
-                item.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
-                item.innerHTML = `
-                    <span class="challenge-name">${challenge.name}</span>
-                    ${challenge.completed ? 
-                        '<span style="color: var(--success); font-weight: bold;">✓ Completed</span>' :
-                        `<button class="btn-complete" onclick="completeChallenge(${challenge.id})">Complete (+${challenge.points})</button>`
-                    }
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function completeChallenge(id) {
-            const challenge = appData.challenges.find(c => c.id === id);
-            if (challenge && !challenge.completed) {
-                challenge.completed = true;
-                appData.totalPoints += challenge.points;
-                saveUserDataToFirebase(); // <--- TỰ ĐỘNG SYNC LÊN FIREBASE
-                renderChallenges();
-                updateDashboard();
-            }
-        }
-
-        // --- TRACKER LOGIC ---
-        const sliders = ['fb', 'ig', 'tt', 'yt'];
-        sliders.forEach(p => {
-            const el = document.getElementById(`${p}-slider`);
-            if(el) el.addEventListener('input', e => {
-                document.getElementById(`${p}-value`).textContent = e.target.value + 'h';
-                let total = 0;
-                sliders.forEach(plat => total += parseFloat(document.getElementById(`${plat}-slider`).value || 0));
-                document.getElementById('total-time').textContent = total.toFixed(1);
-            });
-        });
-
-        function saveTrackerData() {
-            let total = 0;
-            sliders.forEach(p => total += parseFloat(document.getElementById(`${p}-slider`).value));
-            
-            const date = new Date().toISOString().split('T')[0];
-            const payload = {
-                date: date,
-                facebook: parseFloat(document.getElementById('fb-slider').value),
-                tiktok: parseFloat(document.getElementById('tt-slider').value),
-                youtube: parseFloat(document.getElementById('yt-slider').value),
-                total: total
+            const dataToSync = {
+                digitalWellnessData: localStorage.getItem('digitalWellnessData'),
+                platformHistory: localStorage.getItem('platformHistory')
             };
 
-            appData.todayUsage = total.toFixed(1);
-            appData.platformHistory.push(payload);
-            if(appData.platformHistory.length > 30) appData.platformHistory.shift();
-            
-            saveUserDataToFirebase(); // <--- GHI DỮ LIỆU THỜI GIAN LÊN FIREBASE
-            alert('Log saved to Real-time Database.');
-            switchView('dashboard');
+            db.collection('users').doc(currentUser.uid).set({
+                email: currentUser.email,
+                data: dataToSync,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(() => console.log("Real-time Sync OK!"));
         }
 
-        // ==========================================
-        // 6. ADMIN DASHBOARD LOGIC
-        // ==========================================
+        function syncFromFirebase() {
+            if(!currentUser) return;
+            db.collection('users').doc(currentUser.uid).get().then(doc => {
+                if(doc.exists && doc.data().data) {
+                    const cloudData = doc.data().data;
+                    if(cloudData.digitalWellnessData) localStorage.setItem('digitalWellnessData', cloudData.digitalWellnessData);
+                    if(cloudData.platformHistory) localStorage.setItem('platformHistory', cloudData.platformHistory);
+                    
+                    loadData(); // Cập nhật lại UI bằng dữ liệu mới lấy về
+                    updateDashboard();
+                }
+            });
+        }
+
         function loadAdminData() {
             const tbody = document.getElementById('admin-table-body');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading Real-time data...</td></tr>';
             
-            // Fetch all users from Firestore
             db.collection('users').get().then(snapshot => {
                 tbody.innerHTML = '';
-                let totalUsers = 0;
-                let sumPoints = 0;
+                let totalUsers = 0; let sumPoints = 0;
 
                 snapshot.forEach(doc => {
                     const user = doc.data();
-                    const uData = user.data || {};
+                    let parsedData = { totalPoints: 0, brainRotScore: 'N/A', todayUsage: 0 };
+                    let historyCount = 0;
+                    
+                    if(user.data) {
+                        if(user.data.digitalWellnessData) parsedData = JSON.parse(user.data.digitalWellnessData);
+                        if(user.data.platformHistory) historyCount = JSON.parse(user.data.platformHistory).length;
+                    }
+                    
                     totalUsers++;
-                    sumPoints += (uData.totalPoints || 0);
-
+                    sumPoints += (parsedData.totalPoints || 0);
                     const dateStr = user.lastUpdated ? user.lastUpdated.toDate().toLocaleString() : 'N/A';
                     
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td><strong>${user.email}</strong></td>
-                        <td><span class="challenge-points">${uData.totalPoints || 0}</span></td>
-                        <td>${uData.brainRotScore ? uData.brainRotScore + '%' : 'N/A'}</td>
-                        <td>${uData.todayUsage || 0}h</td>
-                        <td>${(uData.platformHistory || []).length} logs</td>
+                        <td><span class="challenge-points">${parsedData.totalPoints || 0}</span></td>
+                        <td>${parsedData.brainRotScore ? parsedData.brainRotScore + '%' : 'N/A'}</td>
+                        <td>${parsedData.todayUsage || 0}h</td>
+                        <td>${historyCount} logs</td>
                         <td>${dateStr}</td>
                     `;
                     tbody.appendChild(tr);
@@ -583,46 +583,463 @@
         }
 
         // ==========================================
-        // 7. CHART.JS VISUALIZATIONS
+        // 4. ORIGINAL CORE LOGIC (GIỮ NGUYÊN)
         // ==========================================
+        function loadData() {
+            const savedData = localStorage.getItem('digitalWellnessData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                hasData = true;
+                totalPoints = data.totalPoints || 0;
+                brainRotScore = data.brainRotScore || null;
+                todayUsage = data.todayUsage || null;
+                weeklyData = data.weeklyData || [];
+                if (data.challenges) {
+                    data.challenges.forEach((savedChallenge, index) => {
+                        if(challenges[index]) challenges[index].completed = savedChallenge.completed;
+                    });
+                }
+            }
+        }
+
+        function saveData() {
+            const data = {
+                totalPoints, brainRotScore, todayUsage, weeklyData,
+                challenges: challenges.map(c => ({ completed: c.completed })),
+                lastUpdated: new Date().toISOString()
+            };
+            localStorage.setItem('digitalWellnessData', JSON.stringify(data));
+            
+            // GỌI HÀM SYNC FIREBASE MỖI KHI DỮ LIỆU LOCAL THAY ĐỔI
+            syncToFirebase();
+        }
+
+        // --- NAVIGATION ---
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { switchView(e.target.dataset.view); });
+        });
+
+        function switchView(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+            
+            currentView = view;
+            if (view === 'dashboard') updateDashboard();
+            else if (view === 'survey') initSurvey();
+            else if (view === 'challenges') renderAllChallenges();
+            else if (view === 'admin' && isAdmin) loadAdminData();
+        }
+
+        function updateDashboard() {
+            if (brainRotScore !== null) {
+                document.getElementById('brain-score').textContent = brainRotScore + '%';
+                let desc = brainRotScore >= 80 ? 'Critical Dependency' : brainRotScore >= 60 ? 'Moderate Fatigue' : brainRotScore >= 40 ? 'Mild Distraction' : 'Optimal Health';
+                document.getElementById('brain-desc').textContent = desc;
+            } else {
+                document.getElementById('brain-score').textContent = '--';
+                document.getElementById('brain-desc').textContent = 'Not assessed yet';
+            }
+            
+            document.getElementById('total-points').textContent = totalPoints;
+            document.getElementById('today-time').textContent = todayUsage !== null ? todayUsage + 'h' : '--';
+            document.getElementById('today-desc').textContent = todayUsage !== null ? 'Logged today' : 'No data logged';
+            
+            renderDashboardChallenges();
+            updateWeeklyStats();
+            setTimeout(updateCharts, 100); 
+            updateHistorySummary();
+        }
+
+        function renderDashboardChallenges() {
+            const container = document.getElementById('dashboard-challenges');
+            container.innerHTML = '';
+            if (challenges.every(c => !c.completed)) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-text">Start your first clinical intervention.</div><button class="btn-start" onclick="switchView('challenges')">View Interventions</button></div>`;
+            } else {
+                challenges.slice(0, 3).forEach(challenge => {
+                    const item = document.createElement('div');
+                    item.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                    item.innerHTML = `<div><span class="challenge-name">${challenge.name}</span></div><span class="challenge-points">+${challenge.points}pts</span>`;
+                    container.appendChild(item);
+                });
+            }
+        }
+
+        function updateHistorySummary() {
+            const platformHistory = JSON.parse(localStorage.getItem('platformHistory') || '[]');
+            const historyDiv = document.getElementById('history-summary');
+            const contentDiv = document.getElementById('history-content');
+            if (platformHistory.length > 0) {
+                historyDiv.style.display = 'block';
+                const recentHistory = platformHistory.slice(-7).reverse();
+                let html = '<div style="display: grid; gap: 8px;">';
+                recentHistory.forEach(entry => {
+                    const date = new Date(entry.date);
+                    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const statusColor = entry.total > 4 ? 'var(--danger)' : entry.total > 2 ? 'var(--warning)' : 'var(--success)';
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px; border-left: 3px solid ${statusColor};">
+                            <div>
+                                <div style="font-weight: 500; font-size: 14px;">${dateStr}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">
+                                    FB: ${entry.facebook.toFixed(1)}h | IG: ${entry.instagram.toFixed(1)}h | TT: ${entry.tiktok.toFixed(1)}h | YT: ${entry.youtube.toFixed(1)}h | X: ${entry.twitter.toFixed(1)}h
+                                </div>
+                            </div>
+                            <div style="font-size: 16px; font-weight: 600; color: ${statusColor};">${entry.total.toFixed(1)}h</div>
+                        </div>`;
+                });
+                html += '</div>';
+                contentDiv.innerHTML = html;
+            } else { historyDiv.style.display = 'none'; }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear your daily log history?')) {
+                localStorage.removeItem('platformHistory');
+                weeklyData = []; todayUsage = null;
+                saveData(); updateDashboard();
+                alert('History cleared successfully.');
+            }
+        }
+
+        function updateWeeklyStats() {
+            const container = document.getElementById('weekly-stats');
+            if (!hasData || weeklyData.length === 0) container.innerHTML = `<div class="empty-state"><div class="empty-state-text">No data available.</div></div>`;
+            else {
+                const avg = (weeklyData.reduce((a, b) => a + b, 0) / weeklyData.length).toFixed(1);
+                container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;"><strong>Daily Average:</strong> ${avg} hours</p><p style="color: var(--text-muted); font-size: 14px;"><strong>Days Tracked:</strong> ${weeklyData.length} days</p>`;
+            }
+        }
+
+        function updateCharts() {
+            const container = document.getElementById('charts-container');
+            if (!hasData || weeklyData.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-text">Visualizations will appear once data is logged.</div></div>`;
+                return;
+            }
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                    <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;"><canvas id="barChart"></canvas></div>
+                    <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;"><canvas id="pieChart"></canvas></div>
+                </div>`;
+            drawCharts();
+        }
+
         function drawCharts() {
-            if(!appData.platformHistory || appData.platformHistory.length === 0) return;
-            
-            const ctxBar = document.getElementById('barChart').getContext('2d');
-            const ctxPie = document.getElementById('pieChart').getContext('2d');
-            
             if(activeCharts.bar) activeCharts.bar.destroy();
             if(activeCharts.pie) activeCharts.pie.destroy();
 
-            const recent = appData.platformHistory.slice(-7);
-            const days = recent.map(r => new Date(r.date).toLocaleDateString('en-US', {weekday: 'short'}));
-            const totals = recent.map(r => r.total);
+            const platformHistory = JSON.parse(localStorage.getItem('platformHistory') || '[]');
+            let days = [], totals = [];
+            
+            if (platformHistory.length > 0) {
+                const recent = platformHistory.slice(-7);
+                days = recent.map(r => new Date(r.date).toLocaleDateString('en-US', {weekday: 'short'}));
+                totals = recent.map(r => r.total);
+            } else {
+                days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; totals = [0,0,0,0,0,0,0];
+            }
 
+            const ctxBar = document.getElementById('barChart').getContext('2d');
             activeCharts.bar = new Chart(ctxBar, {
                 type: 'bar',
-                data: { labels: days, datasets: [{ label: 'Screen Time (h)', data: totals, backgroundColor: '#2563eb' }] }
+                data: { labels: days, datasets: [{ label: 'Total Screen Time (h)', data: totals, backgroundColor: '#2563eb', borderRadius: 4 }] },
+                options: { responsive: true, plugins: { title: { display: true, text: '7-Day Volume Trend', color: '#0f172a' } }, scales: { y: { beginAtZero: true } } }
             });
 
-            let fb=0, tt=0, yt=0;
-            recent.forEach(r => { fb+=r.facebook||0; tt+=r.tiktok||0; yt+=r.youtube||0; });
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            let platformData = [0,0,0,0,0];
+            if (platformHistory.length > 0) {
+                let pTotals = {fb:0, ig:0, tt:0, yt:0, tw:0};
+                platformHistory.forEach(r => { pTotals.fb+=r.facebook||0; pTotals.ig+=r.instagram||0; pTotals.tt+=r.tiktok||0; pTotals.yt+=r.youtube||0; pTotals.tw+=r.twitter||0; });
+                platformData = [pTotals.fb, pTotals.ig, pTotals.tt, pTotals.yt, pTotals.tw];
+            }
+
             activeCharts.pie = new Chart(ctxPie, {
                 type: 'doughnut',
-                data: { labels: ['Facebook', 'TikTok', 'YouTube'], datasets: [{ data: [fb, tt, yt], backgroundColor: ['#1877F2', '#000000', '#FF0000'] }] }
+                data: { labels: ['Facebook', 'Instagram', 'TikTok', 'YouTube', 'Twitter/X'], datasets: [{ data: platformData, backgroundColor: ['#1877F2', '#E4405F', '#000000', '#FF0000', '#1DA1F2'] }] },
+                options: { responsive: true, plugins: { title: { display: true, text: 'Platform Distribution', color: '#0f172a' } } }
             });
         }
+
+        // --- SURVEY LOGIC ---
+        function initSurvey() {
+            surveyStep = 0; surveyAnswers = {};
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('question-container').classList.remove('hidden');
+            document.getElementById('survey-navigation').classList.remove('hidden');
+            showSurveyQuestion();
+        }
+
+        function showSurveyQuestion() {
+            if (surveyStep < surveyQuestions.length) {
+                const q = surveyQuestions[surveyStep];
+                document.getElementById('question-text').textContent = `${surveyStep + 1}. ${q.question}`;
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn'; btn.textContent = opt; btn.dataset.index = idx;
+                    if (surveyAnswers[surveyStep] === idx) btn.classList.add('selected');
+                    btn.addEventListener('click', () => selectOption(idx));
+                    optionsContainer.appendChild(btn);
+                });
+                document.getElementById('progress-fill').style.width = (((surveyStep + 1) / surveyQuestions.length) * 100) + '%';
+                updateNavigationState();
+            } else { calculateBrainRotScore(); showSurveyResult(); }
+        }
+
+        function selectOption(index) {
+            surveyAnswers[surveyStep] = index;
+            document.querySelectorAll('#options-container .option-btn').forEach(btn => btn.classList.toggle('selected', parseInt(btn.dataset.index) === index));
+            updateNavigationState();
+            setTimeout(() => {
+                if (surveyStep < surveyQuestions.length - 1) { surveyStep++; showSurveyQuestion(); } 
+                else { calculateBrainRotScore(); showSurveyResult(); }
+            }, 200);
+        }
+
+        function goToPreviousQuestion() { if (surveyStep > 0) { surveyStep--; showSurveyQuestion(); } }
+        function goToNextQuestion() {
+            if (surveyAnswers[surveyStep] === undefined) return alert('Please select an option.');
+            if (surveyStep < surveyQuestions.length - 1) { surveyStep++; showSurveyQuestion(); } 
+            else { calculateBrainRotScore(); showSurveyResult(); }
+        }
         
-        // Modal Helpers
+        function updateNavigationState() {
+            document.getElementById('prev-question').disabled = surveyStep === 0;
+            const nextBtn = document.getElementById('next-question');
+            nextBtn.textContent = (surveyStep === surveyQuestions.length - 1) ? 'View Results' : 'Next Question';
+            nextBtn.disabled = surveyAnswers[surveyStep] === undefined;
+        }
+
+        function calculateBrainRotScore() {
+            let score = 0; Object.values(surveyAnswers).forEach(ans => score += ans);
+            brainRotScore = Math.round((score / 28) * 100);
+            hasData = true; saveData(); updateDashboard();
+        }
+
+        function showSurveyResult() {
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('survey-navigation').classList.add('hidden');
+            
+            let scoreClass = '', title = '', text = '';
+            if (brainRotScore >= 80) { scoreClass = 'high'; title = 'Critical Dependency'; text = 'Severe cognitive overload detected.'; } 
+            else if (brainRotScore >= 60) { scoreClass = 'high'; title = 'Moderate Fatigue'; text = 'Experiencing significant digital distraction.'; } 
+            else if (brainRotScore >= 40) { scoreClass = 'medium'; title = 'Mild Distraction'; text = 'Early signs of fatigue. Actively manage screen time.'; } 
+            else { scoreClass = 'low'; title = 'Optimal Health'; text = 'Excellent digital wellness. Keep up the good habits!'; }
+            
+            document.getElementById('result-container').innerHTML = `
+                <div class="result-score ${scoreClass}">${brainRotScore}%</div>
+                <h2 style="margin-bottom: 12px;">${title}</h2>
+                <p style="color: var(--text-muted); font-size: 15px; max-width: 400px; margin: 0 auto 24px;">${text}</p>
+                <button class="btn-primary" onclick="switchView('dashboard')">Return to Dashboard</button>
+            `;
+        }
+
+        // --- INTERVENTIONS ---
+        function renderAllChallenges() {
+            const container = document.getElementById('all-challenges');
+            container.innerHTML = '';
+            challenges.forEach(c => {
+                const item = document.createElement('div');
+                item.className = `challenge-item ${c.completed ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <div><span class="challenge-name">${c.name}</span><div class="challenge-subtitle">${c.subtitle}</div></div>
+                    ${c.completed ? '<span style="color: var(--success); font-weight: bold;">✓ Completed</span>' : `<button class="btn-complete" onclick="completeChallenge(${c.id})">Mark Complete</button>`}
+                `;
+                container.appendChild(item);
+            });
+            document.getElementById('challenge-points').textContent = totalPoints;
+        }
+
+        function completeChallenge(id) {
+            const challenge = challenges.find(c => c.id === id);
+            if (challenge && !challenge.completed) {
+                challenge.completed = true; totalPoints += challenge.points; hasData = true;
+                saveData(); renderAllChallenges(); updateDashboard();
+            }
+        }
+
+        // --- TRACKER ---
+        const sliders = ['fb', 'ig', 'tt', 'yt', 'tw'];
+        sliders.forEach(p => {
+            const slider = document.getElementById(`${p}-slider`);
+            if (slider) slider.addEventListener('input', (e) => {
+                document.getElementById(`${p}-value`).textContent = e.target.value + 'h';
+                let total = 0; sliders.forEach(plat => total += parseFloat(document.getElementById(`${plat}-slider`).value));
+                document.getElementById('total-time').textContent = total.toFixed(1);
+                const w = document.getElementById('time-warning');
+                if (total === 0) { w.textContent = 'Move sliders to track'; w.style.color = '#94a3b8'; } 
+                else if (total > 4) { w.textContent = '⚠️ High consumption volume.'; w.style.color = 'var(--danger)'; } 
+                else { w.textContent = '✓ Volume acceptable.'; w.style.color = 'var(--success)'; }
+            });
+        });
+
+        function saveTrackerData() {
+            let total = 0; sliders.forEach(p => total += parseFloat(document.getElementById(`${p}-slider`).value));
+            const date = new Date().toISOString().split('T')[0];
+            processDailyData(date, 
+                parseFloat(document.getElementById('fb-slider').value), parseFloat(document.getElementById('ig-slider').value),
+                parseFloat(document.getElementById('tt-slider').value), parseFloat(document.getElementById('yt-slider').value), parseFloat(document.getElementById('tw-slider').value), total
+            );
+            alert('Log saved successfully.');
+        }
+
         function showDailyInput() {
             document.getElementById('dailyModal').classList.add('show');
             document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+            ['facebook', 'instagram', 'tiktok', 'youtube', 'twitter'].forEach(p => document.getElementById(`input-${p}`).value = '');
+            document.getElementById('modal-total-time').textContent = '0h';
         }
+        function closeDailyModal() { document.getElementById('dailyModal').classList.remove('show'); }
+        
+        document.querySelectorAll('#dailyModal input[type="number"]').forEach(input => {
+            input.addEventListener('input', () => {
+                let total = 0; ['facebook', 'instagram', 'tiktok', 'youtube', 'twitter'].forEach(p => total += parseFloat(document.getElementById(`input-${p}`).value) || 0);
+                document.getElementById('modal-total-time').textContent = total.toFixed(1) + 'h';
+            });
+        });
+
         function saveDailyData() {
-            // Simplified logic for brevity, calls the same logic as saveTrackerData
-            appData.todayUsage = parseFloat(document.getElementById('input-fb').value || 0) + parseFloat(document.getElementById('input-tt').value || 0);
-            saveUserDataToFirebase();
-            document.getElementById('dailyModal').classList.remove('show');
-            updateDashboard();
+            const date = document.getElementById('input-date').value;
+            const fb = parseFloat(document.getElementById('input-facebook').value) || 0;
+            const ig = parseFloat(document.getElementById('input-instagram').value) || 0;
+            const tt = parseFloat(document.getElementById('input-tiktok').value) || 0;
+            const yt = parseFloat(document.getElementById('input-youtube').value) || 0;
+            const tw = parseFloat(document.getElementById('input-twitter').value) || 0;
+            const total = fb + ig + tt + yt + tw;
+            if (total === 0) return alert('Please input at least one metric.');
+            processDailyData(date, fb, ig, tt, yt, tw, total);
+            closeDailyModal(); alert('Daily record saved.');
         }
+
+        function processDailyData(date, fb, ig, tt, yt, tw, total) {
+            todayUsage = total.toFixed(1);
+            weeklyData.push(parseFloat(todayUsage));
+            if (weeklyData.length > 7) weeklyData.shift();
+            
+            const platformData = { date, facebook: fb, instagram: ig, tiktok: tt, youtube: yt, twitter: tw, total };
+            let platformHistory = JSON.parse(localStorage.getItem('platformHistory') || '[]');
+            platformHistory.push(platformData);
+            if (platformHistory.length > 30) platformHistory = platformHistory.slice(-30);
+            
+            localStorage.setItem('platformHistory', JSON.stringify(platformHistory));
+            hasData = true; saveData(); updateDashboard();
+        }
+
+        // --- DATA EXPORT/IMPORT (NGUYÊN BẢN 200 SV) ---
+        function exportAllData() {
+            const exportData = { metadata: { appName: 'Digital Wellness Tracker' }, userData: { brainRotScore, totalPoints, todayUsage, weeklyData, challenges }, rawData: { digitalWellnessData: localStorage.getItem('digitalWellnessData'), platformHistory: localStorage.getItem('platformHistory') } };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `wellness-data.json`; a.click();
+        }
+        
+        function exportToCSV() {
+            const platformHistory = JSON.parse(localStorage.getItem('platformHistory') || '[]');
+            let csv = 'Date,Facebook,Instagram,TikTok,YouTube,Twitter,Total\n';
+            platformHistory.forEach(e => csv += `${e.date},${e.facebook},${e.instagram},${e.tiktok},${e.youtube},${e.twitter},${e.total}\n`);
+            const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `wellness-history.csv`; a.click();
+        }
+
+        function importData(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                if (file.name.endsWith('.json')) {
+                    try {
+                        const data = JSON.parse(content);
+                        if (confirm('Overwrite current local data?')) {
+                            if (data.rawData.digitalWellnessData) localStorage.setItem('digitalWellnessData', data.rawData.digitalWellnessData);
+                            if (data.rawData.platformHistory) localStorage.setItem('platformHistory', data.rawData.platformHistory);
+                            syncToFirebase(); location.reload();
+                        }
+                    } catch (err) { alert('File error.'); }
+                } else if (file.name.endsWith('.csv')) { parseCSV(content); }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(content) {
+            const lines = content.split('\n');
+            const header = lines[0].replace(/\r/g, '').trim().split(',');
+            
+            // Logic 200 Sinh Viên
+            if (header[0] === 'Ma_SV') {
+                if (confirm('Phát hiện dữ liệu nghiên cứu 200 sinh viên! Bạn có muốn tính trung bình?')) {
+                    const hMap = {}; header.forEach((h, idx) => hMap[h] = idx);
+                    let count = 0, sums = { T0_Thoi_Gian_MXH: 0, T0_Facebook: 0, T0_Instagram: 0, T0_TikTok: 0, T0_YouTube: 0, T0_Twitter: 0, T4_Thoi_Gian_MXH: 0, T4_Facebook: 0, T4_Instagram: 0, T4_TikTok: 0, T4_YouTube: 0, T4_Twitter: 0, T4_Brain_Score: 0 };
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].replace(/\r/g, '').trim().split(',');
+                        if (cols.length < header.length) continue;
+                        count++; Object.keys(sums).forEach(key => sums[key] += (parseFloat(cols[hMap[key]]) || 0));
+                    }
+                    const avgs = {}; Object.keys(sums).forEach(key => avgs[key] = sums[key] / count);
+                    
+                    const history = []; const today = new Date(); const periods = ['T0', 'T1', 'T2', 'T3', 'T4'];
+                    periods.forEach((t, i) => {
+                        const date = new Date(today); date.setDate(date.getDate() - (4 - i));
+                        const dateStr = date.toISOString().split('T')[0];
+                        let total = avgs[`${t}_Thoi_Gian_MXH`] || 0, fb = 0, ig = 0, tt = 0, yt = 0, tw = 0;
+                        if (t === 'T0' || t === 'T4') {
+                            fb = avgs[`${t}_Facebook`]; ig = avgs[`${t}_Instagram`]; tt = avgs[`${t}_TikTok`]; yt = avgs[`${t}_YouTube`]; tw = avgs[`${t}_Twitter`];
+                        } else {
+                            let afb = (avgs['T0_Facebook'] + avgs['T4_Facebook'])/2, aig = (avgs['T0_Instagram'] + avgs['T4_Instagram'])/2;
+                            let att = (avgs['T0_TikTok'] + avgs['T4_TikTok'])/2, ayt = (avgs['T0_YouTube'] + avgs['T4_YouTube'])/2, atw = (avgs['T0_Twitter'] + avgs['T4_Twitter'])/2;
+                            let tTotal = afb+aig+att+ayt+atw;
+                            if (tTotal > 0) { fb = (afb/tTotal)*total; ig = (aig/tTotal)*total; tt = (att/tTotal)*total; yt = (ayt/tTotal)*total; tw = (atw/tTotal)*total; }
+                        }
+                        history.push({ date: dateStr, total, facebook: fb, instagram: ig, tiktok: tt, youtube: yt, twitter: tw });
+                    });
+                    
+                    localStorage.setItem('platformHistory', JSON.stringify(history));
+                    let appData = JSON.parse(localStorage.getItem('digitalWellnessData') || '{}');
+                    appData.brainRotScore = Math.round(avgs['T4_Brain_Score']);
+                    appData.todayUsage = parseFloat(avgs['T4_Thoi_Gian_MXH'].toFixed(1));
+                    appData.weeklyData = history.map(h => h.total);
+                    localStorage.setItem('digitalWellnessData', JSON.stringify(appData));
+                    
+                    syncToFirebase(); alert(`Đã tính toán xong trung bình ${count} sinh viên!`); location.reload();
+                }
+            } else {
+                // Logic CSV thông thường
+                if (confirm('Importing CSV will merge history. Proceed?')) {
+                    let appHistory = JSON.parse(localStorage.getItem('platformHistory') || '[]');
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].replace(/\r/g, '').trim().split(',');
+                        if (cols.length >= 7) { 
+                            const d = new Date(cols[0].trim());
+                            if(isNaN(d.getTime())) continue;
+                            const fd = d.toISOString().split('T')[0];
+                            let fb=parseFloat(cols[1])||0, ig=parseFloat(cols[2])||0, tt=parseFloat(cols[3])||0, yt=parseFloat(cols[4])||0, tw=parseFloat(cols[5])||0;
+                            let payload = { date: fd, total: parseFloat(cols[6])||(fb+ig+tt+yt+tw), facebook: fb, instagram: ig, tiktok: tt, youtube: yt, twitter: tw };
+                            const idx = appHistory.findIndex(h => h.date === fd);
+                            if (idx >= 0) appHistory[idx] = payload; else appHistory.push(payload);
+                        }
+                    }
+                    appHistory.sort((a,b) => new Date(a.date) - new Date(b.date));
+                    if (appHistory.length > 30) appHistory = appHistory.slice(-30);
+                    localStorage.setItem('platformHistory', JSON.stringify(appHistory));
+                    
+                    let appData = JSON.parse(localStorage.getItem('digitalWellnessData') || '{}');
+                    appData.weeklyData = appHistory.slice(-7).map(h => h.total);
+                    localStorage.setItem('digitalWellnessData', JSON.stringify(appData));
+                    
+                    syncToFirebase(); alert('CSV History imported.'); location.reload();
+                }
+            }
+        }
+
+        // Init
+        loadData();
+        updateDashboard();
+        switchView('dashboard');
     </script>
 </body>
 </html>
