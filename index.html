@@ -7,37 +7,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-base: #f1f5f9;
-            --bg-surface: rgba(255, 255, 255, 0.85);
-            --bg-sidebar: #0f172a;
+            /* Clinical Light Theme for Main Content */
+            --bg-base: #f4f6f8;
+            --bg-surface: #ffffff;
+            
+            /* Sidebar Dark Navy Theme (Restored to match design) */
+            --bg-sidebar: #0f172a; 
             --text-main: #0f172a;
             --text-muted: #64748b;
             --text-inverse: #f8fafc;
-            --border: rgba(203, 213, 225, 0.5);
+            --border: #e2e8f0;
             
+            /* Data Visualization Colors */
             --accent-primary: #3b82f6;
             --accent-secondary: #0ea5e9;
             --status-critical: #ef4444;
             --status-warning: #f59e0b;
             --status-optimal: #10b981;
             
+            /* Geometry */
             --radius-md: 12px;
             --radius-lg: 16px;
-            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --shadow-glass: 0 4px 20px rgba(0,0,0,0.03);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
         
         body {
             background: var(--bg-base);
-            background-image: radial-gradient(at 0% 0%, hsla(217,100%,97%,1) 0, transparent 50%), radial-gradient(at 100% 100%, hsla(214,100%,94%,1) 0, transparent 50%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             overflow-x: hidden;
         }
 
-        /* Sidebar Navigation */
+        /* Sidebar Navigation - Dark Navy Restored */
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
@@ -53,9 +57,9 @@
         }
 
         .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 40px; height: 40px; background: var(--accent-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; }
-        .brand-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; }
-        .brand-text span { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .brand-icon { width: 40px; height: 40px; background: var(--accent-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white;}
+        .brand-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 2px;}
+        .brand-text span { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; word-break: break-all;}
 
         .nav-menu { display: flex; flex-direction: column; gap: 8px; }
         .nav-btn {
@@ -90,15 +94,13 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Glassmorphism Cards */
+        /* Solid White Cards */
         .glass-card {
             background: var(--bg-surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             padding: 24px;
             box-shadow: var(--shadow-glass);
+            border: 1px solid var(--border);
         }
 
         .header-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
@@ -113,9 +115,9 @@
         }
 
         .metric-item { display: flex; flex-direction: column; gap: 8px; }
-        .metric-label { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .metric-value { font-size: 36px; font-weight: 700; line-height: 1; display: flex; align-items: baseline; gap: 8px; }
-        .metric-sub { font-size: 14px; color: var(--text-muted); }
+        .metric-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 36px; font-weight: 700; line-height: 1; display: flex; align-items: baseline; gap: 8px; color: var(--text-main); }
+        .metric-sub { font-size: 13px; color: var(--text-muted); }
         .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
         .charts-layout {
@@ -128,14 +130,14 @@
         /* Forms & Inputs */
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-main); }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
         .input-field:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         
         .form-range { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; outline: none; -webkit-appearance: none; appearance: none; }
         .form-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: white; border: 3px solid var(--accent-primary); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
         
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
@@ -148,14 +150,14 @@
             gap: 8px;
         }
         .btn-primary { background: var(--accent-primary); color: white; }
-        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .btn-outline { background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); }
         .btn-outline:hover { background: rgba(59, 130, 246, 0.05); }
 
         /* Assessment Survey UI */
         .survey-progress { width: 100%; height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 40px; overflow: hidden; }
         .survey-bar { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .survey-question { font-size: 22px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; }
+        .survey-question { font-size: 20px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; color: var(--text-main); }
         .survey-options { display: flex; flex-direction: column; gap: 12px; }
         .survey-opt-btn {
             padding: 16px 24px;
@@ -168,6 +170,7 @@
             transition: all 0.2s;
             display: flex;
             align-items: center;
+            color: var(--text-main);
         }
         .survey-opt-btn:hover { border-color: #94a3b8; }
         .survey-opt-btn.selected { border-color: var(--accent-primary); background: #eff6ff; box-shadow: inset 0 0 0 1px var(--accent-primary); }
@@ -178,17 +181,7 @@
         .survey-opt-btn.selected::before { border-color: var(--accent-primary); background: var(--accent-primary); box-shadow: inset 0 0 0 3px #eff6ff; }
 
         /* Protocols List */
-        .protocol-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            background: white;
-            transition: 0.2s;
-        }
+        .protocol-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: white; transition: 0.2s; }
         .protocol-item.completed { background: #f0fdf4; border-color: #bbf7d0; }
 
         /* Guide & Resources */
@@ -228,34 +221,25 @@
 </head>
 <body>
 
-   <!-- Auth Overlay -->
+    <!-- Auth Overlay (Chuẩn theo thiết kế thẻ trắng) -->
     <div id="auth-screen" style="position: fixed; inset: 0; background: #f4f6f8; z-index: 9999; display: flex; align-items: center; justify-content: center;">
         <div style="background: white; width: 100%; max-width: 400px; padding: 40px 32px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); text-align: center;">
-            
             <div style="margin: 0 auto 20px; width: 56px; height: 56px; background: #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; font-weight: bold;">
                 ⌘
             </div>
-            
             <h2 style="margin-bottom: 8px; color: #0f172a; font-size: 24px; font-weight: 700;">NeuroTracker</h2>
             <p style="color: #64748b; margin-bottom: 32px; font-size: 14px;">Đăng nhập để đồng bộ dữ liệu đám mây</p>
             
             <input type="email" id="auth-email" placeholder="Email" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 16px; color: #0f172a;">
             <input type="password" id="auth-password" placeholder="Mật khẩu (từ 6 ký tự)" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 24px; color: #0f172a;">
             
-            <button style="width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 12px;" onclick="window.app.login()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
-                Đăng nhập
-            </button>
-            <button style="width: 100%; padding: 14px; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;" onclick="window.app.signup()" onmouseover="this.style.backgroundColor='#eff6ff'" onmouseout="this.style.backgroundColor='transparent'">
-                Tạo tài khoản mới
-            </button>
-            
-            <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 20px; display: none;">
-                <!-- Thông báo lỗi sẽ hiện ở đây -->
-            </div>
+            <button style="width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 12px;" onclick="window.app.login()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">Đăng nhập</button>
+            <button style="width: 100%; padding: 14px; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;" onclick="window.app.signup()" onmouseover="this.style.backgroundColor='#eff6ff'" onmouseout="this.style.backgroundColor='transparent'">Tạo tài khoản mới</button>
+            <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 20px; display: none;"></div>
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <nav class="sidebar">
         <div class="brand">
             <div class="brand-icon">⌘</div>
@@ -267,7 +251,7 @@
         <div class="nav-menu">
             <button class="nav-btn active" data-target="dashboard">📊 <span>Analytics Overview</span></button>
             <button class="nav-btn" data-target="assessment">🧠 <span>MDFI Assessment</span></button>
-            <button class="nav-btn" data-target="tracker">⏱️ <span>Data Logger</span></button>
+            <button class="nav-btn" data-target="tracker">🎲 <span>Data Logger</span></button>
             <button class="nav-btn" data-target="guide">📖 <span>Clinical Guide</span></button>
             <button class="nav-btn" data-target="interventions">🛡️ <span>Interventions</span></button>
             <button class="nav-btn" data-target="resources">📚 <span>Resources</span></button>
@@ -472,23 +456,22 @@
 
     <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
-        // IMPORT FIREBASE SDK v10
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
 
         // ==========================================
-        // 🛑 QUAN TRỌNG: THAY BẰNG CONFIG CỦA BẠN VÀO ĐÂY
+        // 🛑 REPLACE WITH YOUR FIREBASE CONFIG
         // ==========================================
-        const firebaseConfig = {
-              apiKey: "AIzaSyCEtd3iJxZNry_S6MTwRO9OBdEzWA51DZY",
-              authDomain: "neurotracker-swinburnehcmc.firebaseapp.com",
-              projectId: "neurotracker-swinburnehcmc",
-              storageBucket: "neurotracker-swinburnehcmc.firebasestorage.app",
-              messagingSenderId: "482706182439",
-              appId: "1:482706182439:web:b2a1149ccbe2656bead902",
-              measurementId: "G-3ZQPGBF1M4"
+       const firebaseConfig = {
+          apiKey: "AIzaSyCEtd3iJxZNry_S6MTwRO9OBdEzWA51DZY",
+          authDomain: "neurotracker-swinburnehcmc.firebaseapp.com",
+          projectId: "neurotracker-swinburnehcmc",
+          storageBucket: "neurotracker-swinburnehcmc.firebasestorage.app",
+          messagingSenderId: "482706182439",
+          appId: "1:482706182439:web:b2a1149ccbe2656bead902",
+          measurementId: "G-3ZQPGBF1M4"
         };
 
         const firebaseApp = initializeApp(firebaseConfig);
@@ -497,7 +480,7 @@
         let messaging = null;
 
         if ('Notification' in window && 'serviceWorker' in navigator) {
-            try { messaging = getMessaging(firebaseApp); } catch(e) { console.log('Messaging not supported locally without HTTPS/localhost setup'); }
+            try { messaging = getMessaging(firebaseApp); } catch(e) { console.log('Messaging error', e); }
         }
 
         class WellnessApp {
@@ -535,7 +518,6 @@
                 this.charts = { trend: null, radar: null };
                 this.currentUser = null;
 
-                // Bind modal events
                 document.querySelectorAll('#dailyModal input[type="number"]').forEach(input => {
                     input.addEventListener('input', () => this.updateModalTotal());
                 });
@@ -618,7 +600,7 @@
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
-                        // Yêu cầu lấy VAPID Key từ Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
+                        // REPLACE VAPID KEY
                         const token = await getToken(messaging, { vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' });
                         if (token) {
                             await setDoc(doc(db, "users", this.currentUser.uid), { fcmToken: token }, { merge: true });
@@ -1020,7 +1002,6 @@
             }
         }
 
-        // Khởi tạo App gắn vào Window Object để HTML có thể gọi
         window.app = new WellnessApp();
     </script>
 </body>
