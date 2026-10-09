@@ -1,1008 +1,1898 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroTracker | Digital Cognitive Health</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Digital Wellness & Cognitive Assessment</title>
     <style>
         :root {
-            /* Clinical Light Theme for Main Content */
-            --bg-base: #f4f6f8;
-            --bg-surface: #ffffff;
-            
-            /* Sidebar Dark Navy Theme (Restored to match design) */
-            --bg-sidebar: #0f172a; 
+            --primary: #2563eb; /* Professional Blue */
+            --primary-dark: #1e40af;
+            --secondary: #0f766e; /* Clinical Teal */
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --text-inverse: #f8fafc;
             --border: #e2e8f0;
-            
-            /* Data Visualization Colors */
-            --accent-primary: #3b82f6;
-            --accent-secondary: #0ea5e9;
-            --status-critical: #ef4444;
-            --status-warning: #f59e0b;
-            --status-optimal: #10b981;
-            
-            /* Geometry */
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --shadow-glass: 0 4px 20px rgba(0,0,0,0.03);
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            background: var(--bg-base);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
+            line-height: 1.5;
         }
-
-        /* Sidebar Navigation - Dark Navy Restored */
-        .sidebar {
-            width: 260px;
-            background: var(--bg-sidebar);
-            color: var(--text-inverse);
-            padding: 32px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            position: fixed;
-            height: 100vh;
-            z-index: 100;
-            overflow-y: auto;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 40px; height: 40px; background: var(--accent-primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: white;}
-        .brand-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 2px;}
-        .brand-text span { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; word-break: break-all;}
-
-        .nav-menu { display: flex; flex-direction: column; gap: 8px; }
-        .nav-btn {
-            background: transparent;
-            border: none;
-            color: #cbd5e1;
-            padding: 12px 16px;
+        
+        header {
+            background: #1e293b;
+            color: white;
+            padding: 24px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--secondary);
             border-radius: 8px;
-            text-align: left;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo p {
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .auth-controls {
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-        
-        .nav-btn:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-btn.active { background: var(--accent-primary); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
-
-        /* Main Content Layout */
-        .main-wrapper {
-            margin-left: 260px;
-            padding: 40px;
-            width: calc(100% - 260px);
-            max-width: 1400px;
-        }
-
-        .view-section { display: none; animation: fadeIn 0.4s ease forwards; }
-        .view-section.active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Solid White Cards */
-        .glass-card {
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            box-shadow: var(--shadow-glass);
-            border: 1px solid var(--border);
-        }
-
-        .header-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
-        .header-subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; }
-
-        /* Dashboard Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .metric-item { display: flex; flex-direction: column; gap: 8px; }
-        .metric-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .metric-value { font-size: 36px; font-weight: 700; line-height: 1; display: flex; align-items: baseline; gap: 8px; color: var(--text-main); }
-        .metric-sub { font-size: 13px; color: var(--text-muted); }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-
-        .charts-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        /* Forms & Inputs */
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--text-main); }
-        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
-        .input-field:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-        
-        .form-range { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; outline: none; -webkit-appearance: none; appearance: none; }
-        .form-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: white; border: 3px solid var(--accent-primary); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
             font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
-        .btn-primary { background: var(--accent-primary); color: white; }
-        .btn-primary:hover { background: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-        .btn-outline { background: transparent; border: 1px solid var(--accent-primary); color: var(--accent-primary); }
-        .btn-outline:hover { background: rgba(59, 130, 246, 0.05); }
 
-        /* Assessment Survey UI */
-        .survey-progress { width: 100%; height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 40px; overflow: hidden; }
-        .survey-bar { height: 100%; background: var(--accent-primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .survey-question { font-size: 20px; font-weight: 500; margin-bottom: 32px; line-height: 1.4; color: var(--text-main); }
-        .survey-options { display: flex; flex-direction: column; gap: 12px; }
-        .survey-opt-btn {
-            padding: 16px 24px;
-            background: white;
+        .user-email-display {
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .btn-outline-light {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 13px;
+        }
+        .btn-outline-light:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: white;
+        }
+        
+        nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+        }
+        
+        nav button {
+            background: transparent;
+            border: 1px solid transparent;
+            color: #cbd5e1;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        nav button:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        nav button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+        
+        .main-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
             border: 1px solid var(--border);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            padding: 24px;
             border-radius: 12px;
-            text-align: left;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .stat-card.primary { border-top: 4px solid var(--primary); }
+        .stat-card.secondary { border-top: 4px solid var(--secondary); }
+        .stat-card.tertiary { border-top: 4px solid #64748b; }
+        
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        
+        .stat-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .section {
+            margin-bottom: 32px;
+        }
+        
+        .section h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            background: var(--bg-color);
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
+        
+        .empty-state-text {
+            color: var(--text-muted);
             font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .challenge-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .challenge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        
+        .challenge-item:hover {
+            border-color: #94a3b8;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .challenge-item.completed {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        
+        .challenge-name {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+        
+        .challenge-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .challenge-item.completed .challenge-name {
+            color: var(--success);
+        }
+        
+        .challenge-points {
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 14px;
+            background: #ccfbf1;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .btn-complete {
+            padding: 8px 16px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
+        }
+        
+        .btn-complete:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .survey-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        
+        .question {
+            font-size: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 32px;
+            color: var(--text-main);
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option-btn {
+            padding: 16px 24px;
+            background: var(--card-bg);
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
             display: flex;
             align-items: center;
             color: var(--text-main);
         }
-        .survey-opt-btn:hover { border-color: #94a3b8; }
-        .survey-opt-btn.selected { border-color: var(--accent-primary); background: #eff6ff; box-shadow: inset 0 0 0 1px var(--accent-primary); }
-        .survey-opt-btn::before {
-            content: ''; display: inline-block; width: 16px; height: 16px; border: 2px solid #cbd5e1;
-            border-radius: 50%; margin-right: 16px; transition: 0.2s;
-        }
-        .survey-opt-btn.selected::before { border-color: var(--accent-primary); background: var(--accent-primary); box-shadow: inset 0 0 0 3px #eff6ff; }
-
-        /* Protocols List */
-        .protocol-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px; background: white; transition: 0.2s; }
-        .protocol-item.completed { background: #f0fdf4; border-color: #bbf7d0; }
-
-        /* Guide & Resources */
-        .guide-step { display: flex; gap: 20px; padding: 20px; background: white; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; }
-        .guide-number { width: 40px; height: 40px; border-radius: 10px; background: #eff6ff; color: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; }
-        .guide-content h4 { font-size: 16px; margin-bottom: 6px; color: var(--text-main); }
-        .guide-content p { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-        .resource-list { list-style: none; padding-left: 0; }
-        .resource-list li { padding: 12px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 14px; display: flex; align-items: center; gap: 12px; }
-        .resource-list li:last-child { border-bottom: none; }
-        .resource-list li::before { content: '→'; color: var(--accent-primary); font-weight: bold; }
         
-        /* Modal & Auth Overlay */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 12px; padding: 32px; max-width: 480px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
-
-        /* Toast Notification System */
-        #toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 1000; }
-        .toast {
-            background: white; border-left: 4px solid var(--accent-primary); padding: 16px 24px;
-            border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500;
-            animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        .option-btn::before {
+            content: '';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            margin-right: 16px;
+            transition: all 0.2s;
         }
-        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
+        
+        .option-btn:hover {
+            border-color: #94a3b8;
+            background: var(--bg-color);
+        }
+        
+        .option-btn.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+        
+        .option-btn.selected::before {
+            border-color: var(--primary);
+            background: var(--primary);
+            box-shadow: inset 0 0 0 3px #eff6ff;
+        }
+        
+        .survey-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .survey-nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .survey-nav-btn.prev {
+            background: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        
+        .survey-nav-btn.next {
+            background: var(--primary);
+            color: white;
+            min-width: 140px;
+        }
+        
+        .survey-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .result-score {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 700;
+            border: 4px solid;
+        }
+        
+        .result-score.high { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
+        .result-score.medium { border-color: var(--warning); color: var(--warning); background: #fffbeb; }
+        .result-score.low { border-color: var(--success); color: var(--success); background: #f0fdf4; }
+        
+        .tracker-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .tracker-item {
+            margin-bottom: 24px;
+            background: var(--bg-color);
+            padding: 16px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .tracker-label {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+        
+        .tracker-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .total-time {
+            margin-top: 32px;
+            padding: 24px;
+            background: #1e293b;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        
+        .resource-card {
+            padding: 24px;
+            border-radius: 8px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+        }
+        
+        .resource-card h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .resource-list {
+            list-style: none;
+        }
+        
+        .resource-list li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        
+        .resource-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-start {
+            padding: 10px 20px;
+            background: white;
+            color: var(--text-main);
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        
+        .btn-start:hover {
+            background: var(--bg-color);
+            border-color: #94a3b8;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            background: white;
+            font-family: inherit;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            border-radius: 8px;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+        
+        .action-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover { color: var(--text-main); }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
 
-        @media (max-width: 992px) {
-            .charts-layout { grid-template-columns: 1fr; }
-            .sidebar { width: 80px; padding: 24px 16px; }
-            .brand-text, .nav-btn span { display: none; }
-            .main-wrapper { margin-left: 80px; width: calc(100% - 80px); padding: 24px; }
+        .guide-section {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .guide-section h3 { margin-bottom: 12px; font-size: 18px; }
+        .guide-section p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; }
+
+        .step-list { display: flex; flex-direction: column; gap: 12px; }
+        .step-item {
+            display: flex;
+            gap: 16px;
+            background: var(--bg-color);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .step-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .step-content strong { display: block; margin-bottom: 4px; color: var(--text-main); }
+        .step-content p { margin: 0; font-size: 13px; }
+
+        /* Admin Table Styles */
+        .admin-table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .admin-table th, .admin-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .admin-table th {
+            background-color: var(--bg-color);
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .admin-table tr:hover { background-color: #f8fafc; }
+        .admin-status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .admin-status-badge.critical { background: #fef2f2; color: var(--danger); }
+        .admin-status-badge.moderate { background: #fffbeb; color: var(--warning); }
+        .admin-status-badge.optimal { background: #f0fdf4; color: var(--success); }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 16px; align-items: flex-start; }
+            nav { width: 100%; }
         }
     </style>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-    <!-- Auth Overlay (Chuẩn theo thiết kế thẻ trắng) -->
-    <div id="auth-screen" style="position: fixed; inset: 0; background: #f4f6f8; z-index: 9999; display: flex; align-items: center; justify-content: center;">
-        <div style="background: white; width: 100%; max-width: 400px; padding: 40px 32px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); text-align: center;">
-            <div style="margin: 0 auto 20px; width: 56px; height: 56px; background: #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; font-weight: bold;">
-                ⌘
+    <div class="container" id="app-container" style="display: none;">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">📊</div>
+                    <div>
+                        <h1>Digital Wellness Tracker</h1>
+                        <p>Cognitive Health Research</p>
+                    </div>
+                </div>
+                <div class="auth-controls">
+                    <span id="user-display" class="user-email-display">Loading...</span>
+                    <button class="btn-outline-light" onclick="handleLogout()">Logout</button>
+                </div>
+                <nav>
+                    <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+                    <button class="nav-btn" data-view="survey">Assessment</button>
+                    <button class="nav-btn" data-view="tracker">Tracker</button>
+                    <button class="nav-btn" data-view="guide">Clinical Guide</button>
+                    <button class="nav-btn" data-view="challenges">Interventions</button>
+                    <button class="nav-btn" data-view="resources">Resources</button>
+                    <button class="nav-btn hidden" id="admin-nav-btn" data-view="admin">Admin Dashboard</button>
+                </nav>
             </div>
-            <h2 style="margin-bottom: 8px; color: #0f172a; font-size: 24px; font-weight: 700;">NeuroTracker</h2>
-            <p style="color: #64748b; margin-bottom: 32px; font-size: 14px;">Đăng nhập để đồng bộ dữ liệu đám mây</p>
-            
-            <input type="email" id="auth-email" placeholder="Email" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 16px; color: #0f172a;">
-            <input type="password" id="auth-password" placeholder="Mật khẩu (từ 6 ký tự)" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 24px; color: #0f172a;">
-            
-            <button style="width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 12px;" onclick="window.app.login()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">Đăng nhập</button>
-            <button style="width: 100%; padding: 14px; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;" onclick="window.app.signup()" onmouseover="this.style.backgroundColor='#eff6ff'" onmouseout="this.style.backgroundColor='transparent'">Tạo tài khoản mới</button>
-            <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 20px; display: none;"></div>
+        </header>
+
+        <div class="main-content">
+            <div id="dashboard-view" class="view">
+                <h2>Overview Dashboard</h2>
+                
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="switchView('survey')">
+                        <span class="action-icon">📋</span>
+                        <div>
+                            <div class="action-title">Take Assessment</div>
+                            <div class="action-desc">Check Cognitive Load Score</div>
+                        </div>
+                    </button>
+                    <button class="action-btn" onclick="showDailyInput()">
+                        <span class="action-icon">⏱️</span>
+                        <div>
+                            <div class="action-title">Log Daily Data</div>
+                            <div class="action-desc">Update screen time</div>
+                        </div>
+                    </button>
+                    <button class="action-btn" onclick="switchView('challenges')">
+                        <span class="action-icon">🛡</span>
+                        <div>
+                            <div class="action-title">Interventions</div>
+                            <div class="action-desc">Healthy habit building</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <button onclick="exportAllData()" class="btn-start" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                        📥 Export Data
+                    </button>
+                    <button onclick="switchView('resources')" class="btn-start" style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                        ⚙️ Manage Data
+                    </button>
+                </div>
+                
+                <!-- History Summary -->
+                <div id="history-summary" style="display: none; background: var(--bg-color); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px; font-size: 16px;">Last 7 Days History</h3>
+                    <div id="history-content"></div>
+                    <button onclick="clearHistory()" style="margin-top: 16px; padding: 6px 12px; background: white; border: 1px solid var(--danger); color: var(--danger); border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s;">Clear History</button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-label">Cognitive Fatigue Score</div>
+                        <div class="stat-value" id="brain-score">--</div>
+                        <div class="stat-desc" id="brain-desc">Not assessed yet</div>
+                    </div>
+                    
+                    <div class="stat-card secondary">
+                        <div class="stat-label">Wellness Points</div>
+                        <div class="stat-value" id="total-points">0</div>
+                        <div class="stat-desc">Complete interventions to earn</div>
+                    </div>
+                    
+                    <div class="stat-card tertiary">
+                        <div class="stat-label">Today's Usage</div>
+                        <div class="stat-value" id="today-time">--</div>
+                        <div class="stat-desc" id="today-desc">No data logged today</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Daily Interventions</h2>
+                    <div class="challenge-list" id="dashboard-challenges"></div>
+                </div>
+
+                <div class="section">
+                    <h2>Weekly Statistics</h2>
+                    <div id="weekly-stats"></div>
+                </div>
+
+                <div class="section">
+                    <h2>Analytics & Distribution</h2>
+                    <div id="charts-container"></div>
+                </div>
+            </div>
+
+            <div id="survey-view" class="view hidden">
+                <div class="survey-container">
+                    <h2 style="font-size: 24px; margin-bottom: 10px;">Digital Cognitive Assessment</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">Please answer the following diagnostic questions honestly to evaluate your current digital dependency load.</p>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 14%"></div>
+                    </div>
+                    
+                    <div id="question-container">
+                        <div class="question" id="question-text">Loading question...</div>
+                        <div class="options" id="options-container"></div>
+                        <div class="survey-navigation" id="survey-navigation">
+                            <button class="survey-nav-btn prev" id="prev-question" onclick="goToPreviousQuestion()">Back</button>
+                            <button class="survey-nav-btn next" id="next-question" onclick="goToNextQuestion()">Next Question</button>
+                        </div>
+                    </div>
+                    
+                    <div id="result-container" class="result-container hidden"></div>
+                </div>
+            </div>
+
+            <div id="guide-view" class="view hidden">
+                <h2>Clinical Reference Guide</h2>
+                <div class="guide-container">
+                    <div class="guide-section">
+                        <h3>System Overview</h3>
+                        <p>The Digital Wellness Tracker is designed to systematically measure, monitor, and mitigate cognitive fatigue associated with prolonged digital consumption.</p>
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <strong>Baseline Assessment</strong>
+                                    <p>Complete the Digital Cognitive Assessment to establish your current cognitive fatigue tier and receive diagnostic feedback.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <strong>Daily Tracking</strong>
+                                    <p>Log your screen time across platforms accurately. Honesty in logging provides the structural data required for behavioral adjustments.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <strong>Behavioral Interventions</strong>
+                                    <p>Engage in the recommended "Interventions" tab daily to gradually replace passive algorithmic consumption with active, restorative analog habits.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-section">
+                        <h3>Data Privacy & Cloud Sync</h3>
+                        <p>All recorded data is now securely stored in your personal cloud profile. This enables cross-device synchronization and long-term behavioral tracking.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tracker-view" class="view hidden">
+                <h2>Screen Time Tracker</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Adjust the sliders to log your estimated consumption hours for today.</p>
+                
+                <div class="tracker-container">
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Facebook</span><span class="tracker-value" id="fb-value">0h</span></div><input type="range" class="slider" id="fb-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Instagram</span><span class="tracker-value" id="ig-value">0h</span></div><input type="range" class="slider" id="ig-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">TikTok</span><span class="tracker-value" id="tt-value">0h</span></div><input type="range" class="slider" id="tt-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">YouTube</span><span class="tracker-value" id="yt-value">0h</span></div><input type="range" class="slider" id="yt-slider" min="0" max="10" step="0.5" value="0"></div>
+                    <div class="tracker-item"><div class="tracker-header"><span class="tracker-label">Twitter / X</span><span class="tracker-value" id="tw-value">0h</span></div><input type="range" class="slider" id="tw-slider" min="0" max="10" step="0.5" value="0"></div>
+                    
+                    <div class="total-time">
+                        <h3 style="font-weight: 500;">Total Screen Time: <span id="total-time" style="font-weight: 700; font-size: 24px;">0</span>h</h3>
+                        <p id="time-warning" style="margin-top: 8px; font-size: 14px; color: #94a3b8;">Move the sliders to begin tracking</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 24px;">
+                        <button class="btn-primary" onclick="saveTrackerData()">Save Today's Log</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="challenges-view" class="view hidden">
+                <h2>Clinical Interventions</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Complete these restorative habits to rebuild sustained attention and lower cognitive fatigue.</p>
+                
+                <div class="challenge-list" id="all-challenges"></div>
+                
+                <div style="margin-top: 32px; padding: 32px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+                    <h3 style="font-size: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Cumulative Wellness Points</h3>
+                    <p style="font-size: 48px; font-weight: 700; color: var(--primary); margin: 8px 0;" id="challenge-points">0</p>
+                    <p style="font-size: 14px; color: var(--text-muted);">Consistency is key to neurological adaptation.</p>
+                </div>
+            </div>
+
+            <div id="resources-view" class="view hidden">
+                <h2>Resources & Support</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Tools and literature for digital wellness management.</p>
+                
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <h3>📖 Academic Literature</h3>
+                        <ul class="resource-list">
+                            <li>Understanding Algorithmic Dependency</li>
+                            <li>The Neuroscience of Digital Fasting</li>
+                            <li>Rebuilding Sustained Attention</li>
+                            <li>Sleep Hygiene and Blue Light Exposure</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h3>🛡️ Protective Tools</h3>
+                        <ul class="resource-list">
+                            <li>App Blockers & Screen Time Limits</li>
+                            <li>Grayscale Mode Enablement</li>
+                            <li>Notification Batching Tools</li>
+                            <li>Pomodoro Focus Timers</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="section" style="margin-top: 32px;">
+                    <h3>👥 Digital Support Community</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 12px;">Join 500+ members overcoming digital fatigue together.</p>
+                    <p style="font-size: 14px; margin-bottom: 8px;">📅 <strong>Weekly Online Workshops:</strong> Saturdays at 10:00 AM</p>
+                    <p style="font-size: 14px;">💬 <strong>1-on-1 Peer Accountability Groups:</strong> Available upon request</p>
+                </div>
+            </div>
+
+            <div id="admin-view" class="view hidden">
+                <h2>Admin Dashboard</h2>
+                <p style="color: var(--text-muted); margin-bottom: 24px;">Global user statistics and cognitive health overview.</p>
+                
+                <div class="admin-table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>User Account</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Wellness Points</th>
+                                <th>Latest Usage (h)</th>
+                                <th>Last Active</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body">
+                            <tr><td colspan="6" style="text-align:center;">Loading user data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Sidebar Navigation -->
-    <nav class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">⌘</div>
-            <div class="brand-text">
-                <h1>NeuroTracker</h1>
-                <span id="user-email-display">Clinical Dashboard</span>
+    <!-- Authentication Modal -->
+    <div id="login-modal" class="modal show">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Welcome to Wellness</h2>
             </div>
-        </div>
-        <div class="nav-menu">
-            <button class="nav-btn active" data-target="dashboard">📊 <span>Analytics Overview</span></button>
-            <button class="nav-btn" data-target="assessment">🧠 <span>MDFI Assessment</span></button>
-            <button class="nav-btn" data-target="tracker">🎲 <span>Data Logger</span></button>
-            <button class="nav-btn" data-target="guide">📖 <span>Clinical Guide</span></button>
-            <button class="nav-btn" data-target="interventions">🛡️ <span>Interventions</span></button>
-            <button class="nav-btn" data-target="resources">📚 <span>Resources</span></button>
-            <button class="nav-btn" data-target="export">⚙️ <span>Data Management</span></button>
             
-            <button class="nav-btn" style="margin-top: 60px; color: #fca5a5;" onclick="window.app.logout()">
-                🚪 <span>Đăng xuất</span>
-            </button>
+            <div id="login-form-container">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Log in to sync your cognitive data across devices securely, or create a new account.</p>
+                
+                <div id="auth-error-msg" style="color: var(--danger); font-size: 13px; margin-bottom: 12px; display:none;"></div>
+
+                <div class="input-group">
+                    <label class="input-label">Email Address</label>
+                    <input type="email" id="auth-email" class="input-field" placeholder="name@example.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <input type="password" id="auth-password" class="input-field" placeholder="••••••••">
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn-primary" id="btn-login" style="flex: 1;" onclick="handleEmailLogin()">Log In</button>
+                    <button class="btn-start" id="btn-register" style="flex: 1;" onclick="handleEmailRegister()">Register</button>
+                </div>
+                
+                <div style="margin-top: 16px; text-align: center;">
+                    <button class="btn-start" style="width: 100%; border:none; background: transparent; color: var(--text-muted); text-decoration: underline;" onclick="handleGuestLogin()">Continue as Guest</button>
+                </div>
+            </div>
+            
+            <div id="login-loading" style="display: none; text-align: center; padding: 20px;">
+                <div class="loading-spinner"></div>
+                <p style="margin-top: 16px; color: var(--text-muted);">Authenticating...</p>
+            </div>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-wrapper">
-        
-        <!-- DASHBOARD VIEW -->
-        <section id="dashboard" class="view-section active">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h2 class="header-title" style="margin-bottom: 0;">Diagnostic Dashboard</h2>
-                <button class="btn btn-primary" onclick="window.app.showDailyInputModal()">+ Ghi dữ liệu nhanh</button>
-            </div>
-            <p class="header-subtitle">Real-time analysis of digital consumption patterns and cognitive load.</p>
-
-            <div class="metrics-grid">
-                <div class="glass-card metric-item">
-                    <span class="metric-label">Composite Cognitive Score</span>
-                    <div class="metric-value">
-                        <span id="dash-score">--</span><span style="font-size: 20px; color: var(--text-muted);">/100</span>
-                    </div>
-                    <span class="metric-sub" id="dash-status"><span class="status-dot" style="background: var(--text-muted);"></span> Pending Assessment</span>
-                </div>
-                
-                <div class="glass-card metric-item">
-                    <span class="metric-label">Daily Mean Volume (7D)</span>
-                    <div class="metric-value"><span id="dash-mean">0.0</span><span style="font-size: 20px; color: var(--text-muted);">hrs</span></div>
-                    <span class="metric-sub">Based on cloud logging history</span>
-                </div>
-
-                <div class="glass-card metric-item">
-                    <span class="metric-label">Routine Volatility Index (σ)</span>
-                    <div class="metric-value"><span id="dash-volatility">0.00</span></div>
-                    <span class="metric-sub">Standard deviation of daily usage</span>
-                </div>
-            </div>
-
-            <div class="charts-layout">
-                <div class="glass-card">
-                    <h3 style="font-size: 16px; margin-bottom: 20px;">7-Day Consumption Trend</h3>
-                    <canvas id="trendChart" height="250"></canvas>
-                </div>
-                <div class="glass-card">
-                    <h3 style="font-size: 16px; margin-bottom: 20px;">Psychometric Map</h3>
-                    <canvas id="radarChart" height="250"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- ASSESSMENT VIEW -->
-        <section id="assessment" class="view-section">
-            <h2 class="header-title">Multidimensional Digital Fatigue Inventory (MDFI)</h2>
-            <p class="header-subtitle">A clinically-modeled diagnostic tool evaluating three cognitive domains.</p>
-
-            <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
-                <div id="survey-interface">
-                    <div class="survey-progress"><div class="survey-bar" id="survey-bar" style="width: 0%"></div></div>
-                    <h3 class="survey-question" id="survey-q-text">Loading module...</h3>
-                    <div class="survey-options" id="survey-options"></div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border);">
-                        <button class="btn btn-outline" id="btn-prev" style="visibility: hidden;">Previous</button>
-                        <button class="btn btn-primary" id="btn-next" disabled>Next Question</button>
-                    </div>
-                </div>
-
-                <div id="survey-results" style="display: none; text-align: center; padding: 20px 0;">
-                    <div style="font-size: 64px; font-weight: 700; color: var(--accent-primary); line-height: 1;" id="result-score">--</div>
-                    <div style="font-size: 14px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px;">Global Fatigue Index</div>
-                    <p id="result-desc" style="font-size: 16px; max-width: 500px; margin: 0 auto 32px; line-height: 1.6;"></p>
-                    <button class="btn btn-primary" onclick="window.app.navigate('dashboard')">Analyze Dashboard Topology</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- TRACKER VIEW -->
-        <section id="tracker" class="view-section">
-            <h2 class="header-title">Data Logger</h2>
-            <p class="header-subtitle">Input your estimated consumption volume for algorithmic platforms.</p>
-
-            <div class="glass-card" style="max-width: 600px; margin: 0 auto;">
-                <div class="form-group">
-                    <label class="form-label">Log Date</label>
-                    <input type="date" id="log-date" class="input-field">
-                </div>
-
-                <div id="sliders-container">
-                    <!-- Sliders generated by JS -->
-                </div>
-
-                <div style="background: var(--bg-base); padding: 20px; border-radius: 8px; margin: 32px 0; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 600;">Calculated Daily Volume:</span>
-                    <span id="log-total" style="font-size: 24px; font-weight: 700; color: var(--accent-primary);">0.0h</span>
-                </div>
-
-                <button class="btn btn-primary" style="width: 100%;" onclick="window.app.saveLog()">Commit Daily Record</button>
-            </div>
-        </section>
-
-        <!-- CLINICAL GUIDE VIEW -->
-        <section id="guide" class="view-section">
-            <h2 class="header-title">Clinical Reference Guide</h2>
-            <p class="header-subtitle">Systematic methodology for monitoring and mitigating cognitive fatigue.</p>
-
-            <div class="glass-card" style="max-width: 900px;">
-                <h3 style="margin-bottom: 24px; font-size: 20px;">Standard Operating Procedure</h3>
-                
-                <div class="guide-step"><div class="guide-number">1</div><div class="guide-content"><h4>Baseline Diagnostics (MDFI)</h4><p>Begin by completing the Multidimensional Digital Fatigue Inventory in the "Assessment" tab. This generates your initial Composite Cognitive Score, establishing a clinical baseline for your attention span, impulsivity, and somatic disruption.</p></div></div>
-                <div class="guide-step"><div class="guide-number">2</div><div class="guide-content"><h4>Telemetry Logging</h4><p>Access the "Data Logger" tab daily to input your estimated screen time across major algorithmic platforms. Consistent logging allows the system to calculate your Daily Mean Volume and Routine Volatility Index (σ) accurately.</p></div></div>
-                <div class="guide-step"><div class="guide-number">3</div><div class="guide-content"><h4>Behavioral Interventions</h4><p>Navigate to the "Interventions" tab to execute evidence-based protocols. These are designed to systematically replace passive digital consumption with active, restorative analog habits, thereby lowering your cognitive fatigue.</p></div></div>
-                <div class="guide-step"><div class="guide-number">4</div><div class="guide-content"><h4>Data Governance & Privacy</h4><p>All recorded telemetry is stored securely via Firebase Cloud. You can access your data across devices by logging in. Use the "Data Management" tab to safely export your JSON/CSV dataset for external clinical review.</p></div></div>
-            </div>
-        </section>
-
-        <!-- INTERVENTIONS VIEW -->
-        <section id="interventions" class="view-section">
-            <h2 class="header-title">Clinical Interventions</h2>
-            <p class="header-subtitle">Evidence-based behavioral modifications to restore baseline sustained attention.</p>
-            <div class="glass-card" style="max-width: 800px; margin: 0 auto;"><div id="intervention-list"></div></div>
-        </section>
-
-        <!-- RESOURCES VIEW -->
-        <section id="resources" class="view-section">
-            <h2 class="header-title">Academic Resources & Support</h2>
-            <p class="header-subtitle">Literature, tooling, and community support for digital wellness management.</p>
-            <div class="metrics-grid">
-                <div class="glass-card"><h3 style="margin-bottom: 16px; font-size: 18px;">📖 Academic Literature</h3><ul class="resource-list"><li>Understanding Algorithmic Dependency</li><li>The Neuroscience of Digital Fasting</li><li>Rebuilding Sustained Attention</li><li>Sleep Hygiene and Blue Light Exposure</li></ul></div>
-                <div class="glass-card"><h3 style="margin-bottom: 16px; font-size: 18px;">🛡️ Protective Tooling</h3><ul class="resource-list"><li>OS-Level App Blockers & Screen Time Limits</li><li>Grayscale Mode Enablement Protocols</li><li>Notification Batching & Silencing Tools</li><li>Pomodoro Technique Focus Timers</li></ul></div>
-            </div>
-            <div class="glass-card" style="margin-top: 32px;"><h3 style="margin-bottom: 16px; font-size: 18px;">👥 Digital Support Community</h3><p style="color: var(--text-muted); margin-bottom: 16px; font-size: 15px;">Join a network of individuals actively mitigating digital cognitive fatigue through structured accountability.</p><div style="display: flex; flex-direction: column; gap: 12px; background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border);"><div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 20px;">📅</span><div><strong style="display: block; font-size: 14px;">Weekly Online Workshops</strong><span style="font-size: 13px; color: var(--text-muted);">Saturdays at 10:00 AM (EST) - Focus on behavioral modification.</span></div></div><div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 20px;">💬</span><div><strong style="display: block; font-size: 14px;">1-on-1 Peer Accountability</strong><span style="font-size: 13px; color: var(--text-muted);">Paired network routing available upon request.</span></div></div></div></div>
-        </section>
-
-        <!-- DATA MANAGEMENT VIEW -->
-        <section id="export" class="view-section">
-            <h2 class="header-title">Data Management</h2>
-            <p class="header-subtitle">Secure cloud synchronization and data governance.</p>
-
-            <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                <!-- Export Card -->
-                <div class="glass-card">
-                    <h3 style="margin-bottom: 8px; font-size: 16px;">Export Dataset</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Download raw telemetry and psychometric scores in JSON or CSV format for external statistical software (SPSS/R).</p>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="window.app.exportData()">Export Data Package (JSON)</button>
-                    <button class="btn btn-outline" style="width: 100%; margin-top: 8px;" onclick="window.app.exportCSV()">Export History (CSV)</button>
-                </div>
-                
-                <!-- Import Card -->
-                <div class="glass-card">
-                    <h3 style="margin-bottom: 8px; font-size: 16px;">Import Data</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Restore from a previous JSON backup or phân tích dữ liệu nghiên cứu 200 sinh viên (CSV).</p>
-                    <input type="file" id="import-file" accept=".json,.csv" style="display: none;" onchange="window.app.importData(event)">
-                    <button class="btn btn-outline" style="width: 100%; color: var(--text-main); border-color: var(--border);" onclick="document.getElementById('import-file').click()">
-                        📂 Select File
-                    </button>
-                </div>
-
-                <!-- Purge Card -->
-                <div class="glass-card" style="border-color: rgba(239, 68, 68, 0.3);">
-                    <h3 style="margin-bottom: 8px; font-size: 16px; color: var(--status-critical);">Purge Database</h3>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Irreversibly delete all cloud storage records linked to this account, clearing current tracking state.</p>
-                    <button class="btn btn-outline" style="width: 100%; color: var(--status-critical); border-color: var(--status-critical);" onclick="window.app.purgeData()">Execute Purge</button>
-                </div>
-            </div>
-        </section>
-    </main>
+    </div>
 
     <!-- Daily Input Modal -->
     <div id="dailyModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 style="font-size: 18px; font-weight: 600;">Log Daily Usage</h2>
-                <button class="modal-close" onclick="window.app.closeDailyModal()">×</button>
+                <h2 class="modal-title">Log Daily Usage</h2>
+                <button class="modal-close" onclick="closeDailyModal()">×</button>
             </div>
-            <div class="form-group"><label class="form-label">Date</label><input type="date" id="modal-date" class="input-field"></div>
-            <div class="form-group"><label class="form-label">Facebook (hours)</label><input type="number" id="mod-fb" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
-            <div class="form-group"><label class="form-label">Instagram (hours)</label><input type="number" id="mod-ig" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
-            <div class="form-group"><label class="form-label">TikTok (hours)</label><input type="number" id="mod-tt" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
-            <div class="form-group"><label class="form-label">YouTube (hours)</label><input type="number" id="mod-yt" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
-            <div class="form-group"><label class="form-label">Twitter / X (hours)</label><input type="number" id="mod-tw" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
             
-            <div style="background: var(--bg-base); padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--border);">
+            <div class="input-group">
+                <label class="input-label">Date</label>
+                <input type="date" id="input-date" class="input-field" value="">
+            </div>
+            
+            <div class="input-group"><label class="input-label">Facebook (hours)</label><input type="number" id="input-facebook" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
+            <div class="input-group"><label class="input-label">Instagram (hours)</label><input type="number" id="input-instagram" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
+            <div class="input-group"><label class="input-label">TikTok (hours)</label><input type="number" id="input-tiktok" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
+            <div class="input-group"><label class="input-label">YouTube (hours)</label><input type="number" id="input-youtube" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
+            <div class="input-group"><label class="input-label">Twitter / X (hours)</label><input type="number" id="input-twitter" class="input-field" min="0" max="24" step="0.5" placeholder="0"></div>
+            
+            <div style="background: var(--bg-color); padding: 16px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--border);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 500; font-size: 14px;">Total Logged Time:</span>
-                    <span id="modal-total-calc" style="font-size: 20px; font-weight: 600; color: var(--accent-primary);">0h</span>
+                    <span id="modal-total-time" style="font-size: 20px; font-weight: 600; color: var(--primary);">0h</span>
                 </div>
+                <div id="modal-warning" style="margin-top: 8px; font-size: 13px; color: var(--text-muted);"></div>
             </div>
             
             <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="window.app.saveDailyModal()" style="flex: 2;">Save Record</button>
-                <button class="btn btn-outline" onclick="window.app.closeDailyModal()" style="flex: 1;">Cancel</button>
+                <button class="btn-primary" onclick="saveDailyData()" style="flex: 2;">Save Record</button>
+                <button onclick="closeDailyModal()" class="btn-start" style="flex: 1;">Cancel</button>
             </div>
         </div>
     </div>
 
-    <div id="toast-container"></div>
-
-    <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-messaging.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ==========================================
-        // 🛑 REPLACE WITH YOUR FIREBASE CONFIG
-        // ==========================================
-       const firebaseConfig = {
-          apiKey: "AIzaSyCEtd3iJxZNry_S6MTwRO9OBdEzWA51DZY",
-          authDomain: "neurotracker-swinburnehcmc.firebaseapp.com",
-          projectId: "neurotracker-swinburnehcmc",
-          storageBucket: "neurotracker-swinburnehcmc.firebasestorage.app",
-          messagingSenderId: "482706182439",
-          appId: "1:482706182439:web:b2a1149ccbe2656bead902",
-          measurementId: "G-3ZQPGBF1M4"
+        // Environment variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const customAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Init Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // State Variables
+        window.currentUser = null;
+        let adminRealtimeUnsubscribe = null;
+        let userRealtimeUnsubscribe = null;
+
+        // Data Models
+        window.appData = {
+            totalPoints: 0,
+            brainRotScore: null,
+            todayUsage: null,
+            weeklyData: [],
+            challenges: [
+                { id: 1, name: '1-Hour Digital Fast', subtitle: 'Disable all non-essential notifications and avoid screens for 60 consecutive minutes.', completed: false, points: 10 },
+                { id: 2, name: 'Analog Reading', subtitle: 'Read 30 minutes of physical, non-work-related printed material (books, magazines).', completed: false, points: 15 },
+                { id: 3, name: 'Mindfulness Session', subtitle: 'Complete 10 minutes of guided breathing, meditation, or silent reflection.', completed: false, points: 5 },
+                { id: 4, name: 'Sleep Hygiene Reset', subtitle: 'Enable "Do Not Disturb" and place devices outside arm\'s reach 60 minutes before bedtime.', completed: false, points: 20 },
+                { id: 5, name: 'Physical Activation', subtitle: 'Perform 20 minutes of moderate physical exercise without consuming media.', completed: false, points: 15 }
+            ],
+            platformHistory: []
+        };
+        
+        window.hasData = false;
+        window.currentView = 'dashboard';
+        window.activeCharts = {};
+        window.surveyStep = 0;
+        window.surveyAnswers = {};
+
+        // Auth Logic
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                window.currentUser = user;
+                document.getElementById('user-display').textContent = user.email || 'Guest User';
+                document.getElementById('login-modal').classList.remove('show');
+                document.getElementById('app-container').style.display = 'block';
+                
+                // Admin checks
+                if (user.email === 'admin@wellness.com') {
+                    document.getElementById('admin-nav-btn').classList.remove('hidden');
+                } else {
+                    document.getElementById('admin-nav-btn').classList.add('hidden');
+                }
+
+                await loadDataFromFirestore();
+            } else {
+                window.currentUser = null;
+                document.getElementById('app-container').style.display = 'none';
+                showLoginModal();
+            }
+        });
+
+        // Mandatory Pre-Flight Auth
+        async function runSystemAuth() {
+            if (auth.currentUser) return; // Already logged in from session
+            try {
+                if (customAuthToken) {
+                    await signInWithCustomToken(auth, customAuthToken);
+                } 
+                // If no token, we just wait. The onAuthStateChanged will pop up the manual login modal.
+            } catch (err) {
+                console.error("System auth fail:", err);
+            }
+        }
+        
+        // Expose auth functions to global window for HTML onclicks
+        window.handleEmailLogin = async () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            if(!email || !pass) return showAuthError("Email and password required.");
+            setAuthLoading(true);
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                setAuthLoading(false);
+                showAuthError("Login failed. Check credentials.");
+            }
         };
 
-        const firebaseApp = initializeApp(firebaseConfig);
-        const auth = getAuth(firebaseApp);
-        const db = getFirestore(firebaseApp);
-        let messaging = null;
+        window.handleEmailRegister = async () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            if(!email || !pass) return showAuthError("Email and password required.");
+            setAuthLoading(true);
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                setAuthLoading(false);
+                showAuthError("Registration failed. Try a different email.");
+            }
+        };
 
-        if ('Notification' in window && 'serviceWorker' in navigator) {
-            try { messaging = getMessaging(firebaseApp); } catch(e) { console.log('Messaging error', e); }
+        window.handleGuestLogin = async () => {
+            setAuthLoading(true);
+            try {
+                await signInAnonymously(auth);
+            } catch (err) {
+                setAuthLoading(false);
+                showAuthError("Guest login failed.");
+            }
+        };
+
+        window.handleLogout = async () => {
+            if (userRealtimeUnsubscribe) { userRealtimeUnsubscribe(); userRealtimeUnsubscribe = null; }
+            if (adminRealtimeUnsubscribe) { adminRealtimeUnsubscribe(); adminRealtimeUnsubscribe = null; }
+            await signOut(auth);
+        };
+
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.add('show');
+            document.getElementById('login-form-container').style.display = 'block';
+            document.getElementById('login-loading').style.display = 'none';
+            document.getElementById('auth-error-msg').style.display = 'none';
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-password').value = '';
         }
 
-        class WellnessApp {
-            constructor() {
-                this.assessmentItems = [
-                    { domain: 'attention', text: "I experience difficulty sustaining focus on linear, long-form content (books, films) without dual-screening." },
-                    { domain: 'attention', text: "I experience memory fragmentation or 'cognitive fog' immediately following prolonged social media usage." },
-                    { domain: 'impulse', text: "I open algorithmic feeds reflexively without a specific conscious intention." },
-                    { domain: 'impulse', text: "I engage in infinite scrolling longer than intended, resulting in time dysmorphia." },
-                    { domain: 'somatic', text: "I experience sleep displacement, sacrificing necessary rest for continued content consumption." },
-                    { domain: 'somatic', text: "I feel phantom vibrations or mild physical restlessness when separated from my device." }
-                ];
-                this.platforms = [
-                    { id: 'fb', name: 'Facebook', color: '#1877F2' },
-                    { id: 'ig', name: 'Instagram', color: '#E4405F' },
-                    { id: 'tt', name: 'TikTok', color: '#000000' },
-                    { id: 'yt', name: 'YouTube', color: '#FF0000' },
-                    { id: 'tw', name: 'Twitter / X', color: '#1DA1F2' }
-                ];
-                this.interventionsList = [
-                    { id: 1, title: 'Stimulus Control', desc: 'Remove device from physical sleeping environment 60 mins prior to rest.', done: false },
-                    { id: 2, title: 'Gray-scale Therapy', desc: 'Enable monochrome OS display settings to reduce dopamine-driven reward loops.', done: false },
-                    { id: 3, title: 'Analog Saturation', desc: 'Engage in 45 minutes of continuous physical-world activity.', done: false },
-                    { id: 4, title: '1-Hour Digital Fast', desc: 'Disable all non-essential notifications and avoid screens for 60 consecutive minutes.', done: false },
-                    { id: 5, title: 'Mindfulness Session', desc: 'Complete 10 minutes of guided breathing, meditation, or silent reflection.', done: false }
-                ];
+        function setAuthLoading(isLoading) {
+            document.getElementById('login-form-container').style.display = isLoading ? 'none' : 'block';
+            document.getElementById('login-loading').style.display = isLoading ? 'block' : 'none';
+            document.getElementById('auth-error-msg').style.display = 'none';
+        }
 
-                this.state = {
-                    scores: { global: null, attention: 0, impulse: 0, somatic: 0 },
-                    history: [],
-                    interventions: [...this.interventionsList],
-                    surveyStep: 0,
-                    surveyAnswers: []
-                };
-                this.charts = { trend: null, radar: null };
-                this.currentUser = null;
+        function showAuthError(msg) {
+            const errDiv = document.getElementById('auth-error-msg');
+            errDiv.textContent = msg;
+            errDiv.style.display = 'block';
+        }
 
-                document.querySelectorAll('#dailyModal input[type="number"]').forEach(input => {
-                    input.addEventListener('input', () => this.updateModalTotal());
-                });
+        async function loadDataFromFirestore() {
+            if (!window.currentUser) return;
+            
+            const uid = window.currentUser.uid;
+            // RULE 1: Private path
+            const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'data', 'wellnessData');
+            
+            try {
+                const snap = await getDoc(userDocRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    window.appData = { ...window.appData, ...data };
+                    window.hasData = true;
+                } else {
+                    // Reset to defaults
+                    window.hasData = false;
+                    window.appData.totalPoints = 0;
+                    window.appData.brainRotScore = null;
+                    window.appData.todayUsage = null;
+                    window.appData.weeklyData = [];
+                    window.appData.platformHistory = [];
+                    window.appData.challenges.forEach(c => c.completed = false);
+                }
+                
+                window.updateDashboard();
+                if(window.currentView === 'dashboard') window.switchView('dashboard');
 
-                this.initAuth();
-            }
-
-            // --- AUTH & FIREBASE ---
-            initAuth() {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        this.currentUser = user;
-                        document.getElementById('auth-screen').style.display = 'none';
-                        document.getElementById('user-email-display').textContent = user.email;
-                        await this.loadState();
-                        this.setupNavigation();
-                        this.renderTrackerForm();
-                        this.renderInterventions();
-                        document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
-                        this.startSurvey();
-                        this.updateDashboard();
-                        this.requestNotificationPermission();
-                    } else {
-                        this.currentUser = null;
-                        document.getElementById('auth-screen').style.display = 'flex';
-                    }
-                });
-            }
-
-            async login() {
-                const email = document.getElementById('auth-email').value;
-                const pass = document.getElementById('auth-password').value;
-                try { await signInWithEmailAndPassword(auth, email, pass); } 
-                catch (error) { this.showAuthError("Đăng nhập thất bại. Sai email hoặc mật khẩu."); }
-            }
-
-            async signup() {
-                const email = document.getElementById('auth-email').value;
-                const pass = document.getElementById('auth-password').value;
-                try { await createUserWithEmailAndPassword(auth, email, pass); } 
-                catch (error) { this.showAuthError("Không thể tạo tài khoản. Vui lòng kiểm tra định dạng email và mật khẩu (>6 ký tự)."); }
-            }
-
-            async logout() { await signOut(auth); location.reload(); }
-
-            showAuthError(msg) {
-                const errEl = document.getElementById('auth-error');
-                errEl.textContent = msg; errEl.style.display = 'block';
-            }
-
-            async loadState() {
-                try {
-                    const docSnap = await getDoc(doc(db, "users", this.currentUser.uid));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        this.state.scores = data.scores || this.state.scores;
-                        this.state.history = data.history || [];
-                        this.state.interventions = data.interventions || this.interventionsList;
-                    } else {
-                        await this.saveState(); // Init profile
-                    }
-                } catch(e) { console.error("Error loading data", e); }
-            }
-
-            async saveState() {
-                if (!this.currentUser) return;
-                try {
-                    await setDoc(doc(db, "users", this.currentUser.uid), {
-                        scores: this.state.scores,
-                        history: this.state.history,
-                        interventions: this.state.interventions,
-                        lastActive: new Date().toISOString()
-                    }, { merge: true });
-                    this.updateDashboard();
-                } catch(e) { this.showToast("Cloud sync failed.", "error"); }
-            }
-
-            async requestNotificationPermission() {
-                if (!messaging) return;
-                try {
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        // REPLACE VAPID KEY
-                        const token = await getToken(messaging, { vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' });
-                        if (token) {
-                            await setDoc(doc(db, "users", this.currentUser.uid), { fcmToken: token }, { merge: true });
+                // Setup realtime sync for this user
+                if (!userRealtimeUnsubscribe) {
+                    userRealtimeUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            window.appData = { ...window.appData, ...docSnap.data() };
+                            window.hasData = true;
+                            if(window.currentView === 'dashboard') window.updateDashboard();
+                            if(window.currentView === 'challenges') window.renderAllChallenges();
                         }
-                    }
-                } catch (error) { console.log('Notification permission denied or not configured properly'); }
-            }
-
-            // --- UI UTILS ---
-            setupNavigation() {
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => { if(e.currentTarget.dataset.target) this.navigate(e.currentTarget.dataset.target); });
-                });
-            }
-
-            navigate(targetId) {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.querySelector(`[data-target="${targetId}"]`).classList.add('active');
-                document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-                document.getElementById(targetId).classList.add('active');
-                if (targetId === 'dashboard') this.updateDashboard();
-            }
-
-            showToast(message, type = 'success') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                const color = type === 'success' ? 'var(--status-optimal)' : 'var(--status-critical)';
-                toast.style.borderLeftColor = color;
-                toast.innerHTML = `<span style="color: ${color}; font-weight: bold;">${type === 'success' ? '✓' : '⚠️'}</span> ${message}`;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.animation = 'fadeOut 0.3s ease forwards';
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }
-
-            // --- TRACKER & MODAL ---
-            renderTrackerForm() {
-                const container = document.getElementById('sliders-container');
-                container.innerHTML = '';
-                this.platforms.forEach(p => {
-                    container.innerHTML += `
-                        <div class="form-group">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <label style="font-size: 14px; font-weight: 500;">${p.name}</label>
-                                <span id="val-${p.id}" style="font-weight: 600; font-size: 14px; color: var(--text-muted);">0.0h</span>
-                            </div>
-                            <input type="range" id="sl-${p.id}" class="form-range" min="0" max="8" step="0.5" value="0" oninput="window.app.updateTrackerTotal()">
-                        </div>
-                    `;
-                });
-            }
-
-            updateTrackerTotal() {
-                let total = 0;
-                this.platforms.forEach(p => {
-                    const val = parseFloat(document.getElementById(`sl-${p.id}`).value);
-                    document.getElementById(`val-${p.id}`).textContent = val.toFixed(1) + 'h';
-                    total += val;
-                });
-                document.getElementById('log-total').textContent = total.toFixed(1) + 'h';
-            }
-
-            saveLog() {
-                const date = document.getElementById('log-date').value;
-                let payload = { date: date, total: 0, platforms: {} };
-                this.platforms.forEach(p => {
-                    const val = parseFloat(document.getElementById(`sl-${p.id}`).value);
-                    payload.platforms[p.id] = val; payload.total += val;
-                });
-                this.processLogData(payload);
-                this.platforms.forEach(p => { document.getElementById(`sl-${p.id}`).value = 0; document.getElementById(`val-${p.id}`).textContent = '0.0h'; });
-                document.getElementById('log-total').textContent = '0.0h';
-            }
-
-            showDailyInputModal() {
-                document.getElementById('dailyModal').classList.add('show');
-                document.getElementById('modal-date').value = new Date().toISOString().split('T')[0];
-                ['fb', 'ig', 'tt', 'yt', 'tw'].forEach(p => document.getElementById(`mod-${p}`).value = '');
-                this.updateModalTotal();
-            }
-
-            closeDailyModal() { document.getElementById('dailyModal').classList.remove('show'); }
-
-            updateModalTotal() {
-                let total = 0;
-                ['fb', 'ig', 'tt', 'yt', 'tw'].forEach(p => total += parseFloat(document.getElementById(`mod-${p}`).value) || 0);
-                document.getElementById('modal-total-calc').textContent = total.toFixed(1) + 'h';
-            }
-
-            saveDailyModal() {
-                const date = document.getElementById('modal-date').value;
-                let payload = { date: date, total: 0, platforms: {} };
-                ['fb', 'ig', 'tt', 'yt', 'tw'].forEach(p => {
-                    const val = parseFloat(document.getElementById(`mod-${p}`).value) || 0;
-                    payload.platforms[p] = val; payload.total += val;
-                });
-                if (payload.total === 0) return this.showToast('Please input at least one metric.', 'error');
-                this.processLogData(payload);
-                this.closeDailyModal();
-            }
-
-            processLogData(payload) {
-                const existingIdx = this.state.history.findIndex(h => h.date === payload.date);
-                if (existingIdx >= 0) this.state.history[existingIdx] = payload;
-                else this.state.history.push(payload);
-                
-                this.state.history.sort((a,b) => new Date(a.date) - new Date(b.date));
-                if (this.state.history.length > 14) this.state.history.shift(); // Keep last 14 days
-                
-                this.saveState();
-                this.showToast('Telemetry synced to cloud.');
-            }
-
-            // --- SURVEY ---
-            startSurvey() {
-                this.state.surveyStep = 0;
-                this.state.surveyAnswers = [];
-                document.getElementById('survey-interface').style.display = 'block';
-                document.getElementById('survey-results').style.display = 'none';
-                this.renderQuestion();
-                document.getElementById('btn-prev').onclick = () => { if(this.state.surveyStep > 0) { this.state.surveyStep--; this.renderQuestion(); } };
-                document.getElementById('btn-next').onclick = () => this.nextQuestion();
-            }
-
-            renderQuestion() {
-                const q = this.assessmentItems[this.state.surveyStep];
-                document.getElementById('survey-q-text').textContent = `${this.state.surveyStep + 1}. ${q.text}`;
-                const container = document.getElementById('survey-options');
-                container.innerHTML = '';
-                const currentAns = this.state.surveyAnswers[this.state.surveyStep];
-                ['Never', 'Rarely', 'Sometimes', 'Frequently', 'Almost Always'].forEach((opt, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = `survey-opt-btn ${currentAns === idx ? 'selected' : ''}`;
-                    btn.textContent = opt;
-                    btn.onclick = () => {
-                        this.state.surveyAnswers[this.state.surveyStep] = idx;
-                        this.renderQuestion(); 
-                        document.getElementById('btn-next').disabled = false;
-                    };
-                    container.appendChild(btn);
-                });
-                document.getElementById('survey-bar').style.width = `${((this.state.surveyStep + 1) / this.assessmentItems.length) * 100}%`;
-                document.getElementById('btn-prev').style.visibility = this.state.surveyStep === 0 ? 'hidden' : 'visible';
-                document.getElementById('btn-next').disabled = currentAns === undefined;
-                document.getElementById('btn-next').textContent = this.state.surveyStep === this.assessmentItems.length - 1 ? 'Analyze Data' : 'Next Question';
-            }
-
-            nextQuestion() {
-                if (this.state.surveyStep < this.assessmentItems.length - 1) { this.state.surveyStep++; this.renderQuestion(); } 
-                else this.calculateAssessment();
-            }
-
-            calculateAssessment() {
-                let domainScores = { attention: 0, impulse: 0, somatic: 0 };
-                let maxDomain = { attention: 0, impulse: 0, somatic: 0 };
-                let totalScore = 0;
-                let maxTotal = this.assessmentItems.length * 4;
-
-                this.state.surveyAnswers.forEach((ans, idx) => {
-                    const domain = this.assessmentItems[idx].domain;
-                    domainScores[domain] += ans; maxDomain[domain] += 4; totalScore += ans;
-                });
-
-                this.state.scores = {
-                    global: Math.round((totalScore / maxTotal) * 100),
-                    attention: Math.round((domainScores.attention / maxDomain.attention) * 100),
-                    impulse: Math.round((domainScores.impulse / maxDomain.impulse) * 100),
-                    somatic: Math.round((domainScores.somatic / maxDomain.somatic) * 100)
-                };
-                this.saveState();
-                
-                document.getElementById('survey-interface').style.display = 'none';
-                document.getElementById('survey-results').style.display = 'block';
-                document.getElementById('result-score').textContent = this.state.scores.global;
-                
-                let desc = "Optimal Baseline. Routine functioning is uninhibited.";
-                if (this.state.scores.global > 70) desc = "Critical Warning: Severe algorithmic dependency. Immediate intervention required.";
-                else if (this.state.scores.global > 40) desc = "Moderate cognitive fatigue. Attention span narrowing detected.";
-                document.getElementById('result-desc').textContent = desc;
-            }
-
-            // --- INTERVENTIONS ---
-            renderInterventions() {
-                const container = document.getElementById('intervention-list');
-                container.innerHTML = '';
-                this.state.interventions.forEach(p => {
-                    container.innerHTML += `
-                        <div class="protocol-item ${p.done ? 'completed' : ''}">
-                            <div><h4 style="margin-bottom: 4px; font-size: 15px;">${p.title}</h4><p style="font-size: 13px; color: var(--text-muted);">${p.desc}</p></div>
-                            <button class="btn ${p.done ? 'btn-outline' : 'btn-primary'}" onclick="window.app.toggleIntervention(${p.id})">
-                                ${p.done ? 'Revert' : 'Execute'}
-                            </button>
-                        </div>
-                    `;
-                });
-            }
-
-            toggleIntervention(id) {
-                const p = this.state.interventions.find(x => x.id === id);
-                if (p) { p.done = !p.done; this.saveState(); this.renderInterventions(); }
-            }
-
-            // --- DASHBOARD & CHARTS ---
-            updateDashboard() {
-                const scoreEl = document.getElementById('dash-score');
-                const statusEl = document.getElementById('dash-status');
-                
-                if (this.state.scores.global !== null) {
-                    const g = this.state.scores.global;
-                    scoreEl.textContent = g;
-                    let color = g > 70 ? 'var(--status-critical)' : g > 40 ? 'var(--status-warning)' : 'var(--status-optimal)';
-                    let text = g > 70 ? 'Critical Load' : g > 40 ? 'Moderate Fatigue' : 'Healthy Baseline';
-                    scoreEl.style.color = color;
-                    statusEl.innerHTML = `<span class="status-dot" style="background: ${color};"></span> ${text}`;
+                    }, (err) => { console.error("Realtime sync error:", err); });
                 }
 
-                if (this.state.history.length > 0) {
-                    const totals = this.state.history.map(h => h.total);
-                    const mean = totals.reduce((a,b)=>a+b,0) / totals.length;
-                    document.getElementById('dash-mean').textContent = mean.toFixed(1);
+            } catch (e) {
+                console.error("Error loading data:", e);
+                alert("Failed to load user data from cloud.");
+            }
+        }
+
+        window.saveDataToFirestore = async function() {
+            if (!window.currentUser) return;
+            const uid = window.currentUser.uid;
+            
+            // RULE 1: Private user data
+            const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'data', 'wellnessData');
+            // RULE 1: Public data for Admin mapping
+            const globalStatsRef = doc(db, 'artifacts', appId, 'public', 'data', 'globalStats', uid);
+            
+            try {
+                // Save Private Data
+                await setDoc(userDocRef, window.appData);
+                
+                // Save Public Summary Data (For Admin)
+                await setDoc(globalStatsRef, {
+                    uid: uid,
+                    email: window.currentUser.email || 'Guest User',
+                    brainRotScore: window.appData.brainRotScore,
+                    totalPoints: window.appData.totalPoints,
+                    todayUsage: window.appData.todayUsage,
+                    lastUpdated: new Date().toISOString()
+                }, { merge: true });
+
+            } catch (err) {
+                console.error("Error saving data:", err);
+            }
+        };
+
+        // Initialize system auth
+        runSystemAuth();
+
+
+        window.fetchAdminData = async function() {
+            if (!window.currentUser || window.currentUser.email !== 'admin@wellness.com') return;
+            
+            const tbody = document.getElementById('admin-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading user data...</td></tr>';
+
+            const globalStatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'globalStats');
+            
+            if (!adminRealtimeUnsubscribe) {
+                adminRealtimeUnsubscribe = onSnapshot(globalStatsCol, (snapshot) => {
+                    const users = [];
+                    snapshot.forEach(doc => users.push(doc.data()));
+                    renderAdminTable(users);
+                }, (error) => {
+                    console.error("Admin fetch error", error);
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">Error loading admin data.</td></tr>';
+                });
+            }
+        };
+
+        function renderAdminTable(users) {
+            const tbody = document.getElementById('admin-table-body');
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users registered yet.</td></tr>';
+                return;
+            }
+
+            // Sort by lastUpdated descending
+            users.sort((a,b) => new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0));
+
+            let html = '';
+            users.forEach(user => {
+                let score = user.brainRotScore;
+                let statusBadge = '<span class="admin-status-badge">N/A</span>';
+                
+                if (score !== null && score !== undefined) {
+                    if (score >= 80) statusBadge = '<span class="admin-status-badge critical">Critical</span>';
+                    else if (score >= 60) statusBadge = '<span class="admin-status-badge moderate">Moderate</span>';
+                    else if (score >= 40) statusBadge = '<span class="admin-status-badge moderate">Mild</span>';
+                    else statusBadge = '<span class="admin-status-badge optimal">Optimal</span>';
+                }
+
+                const dateStr = user.lastUpdated ? new Date(user.lastUpdated).toLocaleDateString() + ' ' + new Date(user.lastUpdated).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Unknown';
+
+                html += `
+                    <tr>
+                        <td style="font-weight: 500;">${user.email} <div style="font-size:11px;color:var(--text-muted);">${user.uid}</div></td>
+                        <td>${score !== null && score !== undefined ? score + '%' : '--'}</td>
+                        <td>${statusBadge}</td>
+                        <td>${user.totalPoints || 0}</td>
+                        <td>${user.todayUsage !== null && user.todayUsage !== undefined ? user.todayUsage : '--'}</td>
+                        <td style="font-size: 12px; color: var(--text-muted);">${dateStr}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+    </script>
+
+    <script>
+        // UI Navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                window.switchView(e.target.dataset.view);
+            });
+        });
+
+        window.switchView = function(view) {
+            document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.querySelector(`[data-view="${view}"]`);
+            if(targetBtn) targetBtn.classList.add('active');
+            
+            window.currentView = view;
+            
+            if (view === 'dashboard') window.updateDashboard();
+            else if (view === 'survey') initSurvey();
+            else if (view === 'challenges') window.renderAllChallenges();
+            else if (view === 'admin') window.fetchAdminData();
+        };
+
+        window.updateDashboard = function() {
+            const data = window.appData;
+            
+            if (data.brainRotScore !== null) {
+                document.getElementById('brain-score').textContent = data.brainRotScore + '%';
+                let desc = data.brainRotScore >= 80 ? 'Critical Dependency' : 
+                           data.brainRotScore >= 60 ? 'Moderate Fatigue' : 
+                           data.brainRotScore >= 40 ? 'Mild Distraction' : 'Optimal Health';
+                document.getElementById('brain-desc').textContent = desc;
+            } else {
+                document.getElementById('brain-score').textContent = '--';
+                document.getElementById('brain-desc').textContent = 'Not assessed yet';
+            }
+            
+            document.getElementById('total-points').textContent = data.totalPoints;
+            
+            if (data.todayUsage !== null) {
+                document.getElementById('today-time').textContent = data.todayUsage + 'h';
+                document.getElementById('today-desc').textContent = 'Logged today';
+            } else {
+                document.getElementById('today-time').textContent = '--';
+                document.getElementById('today-desc').textContent = 'No data logged';
+            }
+            
+            renderDashboardChallenges();
+            updateWeeklyStats();
+            setTimeout(updateCharts, 100); 
+            updateHistorySummary();
+        };
+        
+        function updateHistorySummary() {
+            const platformHistory = window.appData.platformHistory || [];
+            const historyDiv = document.getElementById('history-summary');
+            const contentDiv = document.getElementById('history-content');
+            
+            if (platformHistory.length > 0) {
+                historyDiv.style.display = 'block';
+                const recentHistory = [...platformHistory].slice(-7).reverse();
+                let html = '<div style="display: grid; gap: 8px;">';
+                recentHistory.forEach(entry => {
+                    const date = new Date(entry.date);
+                    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    const statusColor = entry.total > 4 ? 'var(--danger)' : entry.total > 2 ? 'var(--warning)' : 'var(--success)';
                     
-                    const variance = totals.map(v => Math.pow(v - mean, 2)).reduce((a,b)=>a+b,0) / totals.length;
-                    document.getElementById('dash-volatility').textContent = Math.sqrt(variance).toFixed(2);
-                }
-
-                this.renderCharts();
-            }
-
-            renderCharts() {
-                if (this.charts.trend) this.charts.trend.destroy();
-                if (this.charts.radar) this.charts.radar.destroy();
-
-                const hist = this.state.history.slice(-7);
-                const labels = hist.length ? hist.map(h => new Date(h.date).toLocaleDateString('en-US', {weekday:'short'})) : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-                const data = hist.length ? hist.map(h => h.total) : [0,0,0,0,0,0,0];
-
-                this.charts.trend = new Chart(document.getElementById('trendChart').getContext('2d'), {
-                    type: 'bar',
-                    data: { labels: labels, datasets: [{ label: 'Volume (hrs)', data: data, backgroundColor: '#3b82f6', borderRadius: 4 }] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                    html += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border-radius: 6px; border-left: 3px solid ${statusColor};">
+                            <div>
+                                <div style="font-weight: 500; font-size: 14px;">${dateStr}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">
+                                    FB: ${entry.facebook.toFixed(1)}h | IG: ${entry.instagram.toFixed(1)}h | TT: ${entry.tiktok.toFixed(1)}h | YT: ${entry.youtube.toFixed(1)}h | X: ${entry.twitter.toFixed(1)}h
+                                </div>
+                            </div>
+                            <div style="font-size: 16px; font-weight: 600; color: ${statusColor};">${entry.total.toFixed(1)}h</div>
+                        </div>
+                    `;
                 });
+                html += '</div>';
+                contentDiv.innerHTML = html;
+            } else {
+                historyDiv.style.display = 'none';
+            }
+        }
+        
+        window.clearHistory = async function() {
+            // Cannot use confirm alert block in iframe usually, but we have custom UI or just run it
+            const modalConfirm = window.confirm('Are you sure you want to clear your daily log history from the cloud?');
+            if (modalConfirm) {
+                window.appData.platformHistory = [];
+                window.appData.weeklyData = [];
+                window.appData.todayUsage = null;
+                await window.saveDataToFirestore();
+                window.updateDashboard();
+            }
+        };
 
-                const s = this.state.scores;
-                const radarData = s.global !== null ? [s.attention, s.impulse, s.somatic] : [0,0,0];
-
-                this.charts.radar = new Chart(document.getElementById('radarChart').getContext('2d'), {
-                    type: 'radar',
-                    data: {
-                        labels: ['Attention Deficit', 'Impulse Dependency', 'Somatic Disruption'],
-                        datasets: [{ label: 'Load Intensity', data: radarData, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', pointBackgroundColor: '#0f172a' }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } } }
+        function renderDashboardChallenges() {
+            const container = document.getElementById('dashboard-challenges');
+            container.innerHTML = '';
+            
+            if (window.appData.challenges.every(c => !c.completed)) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-text">Start your first clinical intervention to build resilience.</div>
+                        <button class="btn-start" onclick="switchView('challenges')">View Interventions</button>
+                    </div>
+                `;
+            } else {
+                window.appData.challenges.slice(0, 3).forEach(challenge => {
+                    const item = document.createElement('div');
+                    item.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                    item.innerHTML = `
+                        <div><span class="challenge-name">${challenge.name}</span></div>
+                        <span class="challenge-points">+${challenge.points}pts</span>
+                    `;
+                    container.appendChild(item);
                 });
-            }
-
-            // --- DATA MANAGEMENT ---
-            exportData() {
-                const blob = new Blob([JSON.stringify(this.state, null, 2)], {type: 'application/json'});
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `neurotracker_export_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                this.showToast('JSON Data package exported.');
-            }
-
-            exportCSV() {
-                if (this.state.history.length === 0) return this.showToast('No history to export.', 'error');
-                let csv = 'Date,Facebook,Instagram,TikTok,YouTube,Twitter,Total\n';
-                this.state.history.forEach(h => {
-                    const p = h.platforms || {};
-                    csv += `${h.date},${p.fb||0},${p.ig||0},${p.tt||0},${p.yt||0},${p.tw||0},${h.total}\n`;
-                });
-                const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `neurotracker_history_${new Date().toISOString().split('T')[0]}.csv`;
-                a.click();
-                this.showToast('CSV History exported.');
-            }
-
-            importData(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const content = e.target.result;
-                    if (file.name.endsWith('.json')) this.parseJSONImport(content);
-                    else if (file.name.endsWith('.csv')) this.parseCSVImport(content);
-                    else this.showToast('Unsupported format.', 'error');
-                    event.target.value = '';
-                };
-                reader.readAsText(file);
-            }
-
-            parseJSONImport(content) {
-                try {
-                    const data = JSON.parse(content);
-                    if (confirm('Importing will overwrite current cloud data. Proceed?')) {
-                        if(data.scores) this.state.scores = data.scores;
-                        if(data.history) this.state.history = data.history;
-                        if(data.interventions) this.state.interventions = data.interventions;
-                        this.saveState();
-                        this.showToast('JSON imported successfully. Reloading...');
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                } catch (err) { this.showToast('Error parsing JSON.', 'error'); }
-            }
-
-            parseCSVImport(content) {
-                try {
-                    const lines = content.split('\n');
-                    if (lines.length < 2) throw new Error('Empty CSV');
-                    const headerLine = lines[0].replace(/\r/g, '').trim();
-                    const header = headerLine.split(',');
-
-                    // Research Dataset Logic
-                    if (header[0] === 'Ma_SV') {
-                        if (confirm('Phát hiện dữ liệu nghiên cứu 200 sinh viên! Bạn có muốn tính trung bình toàn bộ (của tất cả sinh viên) để xem bức tranh tổng thể và lưu lên Cloud không?')) {
-                            const hMap = {}; header.forEach((h, idx) => hMap[h] = idx);
-                            let count = 0;
-                            let sums = { T0_Thoi_Gian_MXH: 0, T1_Thoi_Gian_MXH: 0, T2_Thoi_Gian_MXH: 0, T3_Thoi_Gian_MXH: 0, T4_Thoi_Gian_MXH: 0, T0_Facebook: 0, T0_Instagram: 0, T0_TikTok: 0, T0_YouTube: 0, T0_Twitter: 0, T4_Facebook: 0, T4_Instagram: 0, T4_TikTok: 0, T4_YouTube: 0, T4_Twitter: 0, T4_Brain_Score: 0 };
-                            
-                            for (let i = 1; i < lines.length; i++) {
-                                const line = lines[i].replace(/\r/g, '').trim();
-                                if (!line) continue;
-                                const cols = line.split(',');
-                                if (cols.length < header.length) continue;
-                                count++;
-                                Object.keys(sums).forEach(key => sums[key] += (parseFloat(cols[hMap[key]]) || 0));
-                            }
-                            
-                            if (count === 0) return this.showToast('Không tìm thấy dữ liệu hợp lệ', 'error');
-                            
-                            const avgs = {}; Object.keys(sums).forEach(key => avgs[key] = sums[key] / count);
-                            let newHistory = [];
-                            const today = new Date();
-                            ['T0', 'T1', 'T2', 'T3', 'T4'].forEach((t, i) => {
-                                const date = new Date(today); date.setDate(date.getDate() - (4 - i));
-                                const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-                                let total = avgs[`${t}_Thoi_Gian_MXH`];
-                                let fb=0, ig=0, tt=0, yt=0, tw=0;
-                                
-                                if (t==='T0' || t==='T4') {
-                                    fb=avgs[`${t}_Facebook`]; ig=avgs[`${t}_Instagram`]; tt=avgs[`${t}_TikTok`]; yt=avgs[`${t}_YouTube`]; tw=avgs[`${t}_Twitter`];
-                                } else {
-                                    let afb=(avgs['T0_Facebook']+avgs['T4_Facebook'])/2, aig=(avgs['T0_Instagram']+avgs['T4_Instagram'])/2, att=(avgs['T0_TikTok']+avgs['T4_TikTok'])/2, ayt=(avgs['T0_YouTube']+avgs['T4_YouTube'])/2, atw=(avgs['T0_Twitter']+avgs['T4_Twitter'])/2;
-                                    let tTotal = afb+aig+att+ayt+atw;
-                                    if(tTotal>0){ fb=(afb/tTotal)*total; ig=(aig/tTotal)*total; tt=(att/tTotal)*total; yt=(ayt/tTotal)*total; tw=(atw/tTotal)*total; }
-                                }
-                                newHistory.push({ date: dateStr, total: total, platforms: {fb, ig, tt, yt, tw} });
-                            });
-                            
-                            this.state.history = newHistory;
-                            this.state.scores.global = Math.round(avgs['T4_Brain_Score']);
-                            this.saveState();
-                            this.showToast(`Phân tích ${count} sinh viên hoàn tất. Đang tải lại...`);
-                            setTimeout(() => location.reload(), 1500);
-                        }
-                    } 
-                    // Standard App CSV Logic
-                    else {
-                        if (confirm('Importing CSV will merge/overwrite history for matching dates. Proceed?')) {
-                            let newHistory = [...this.state.history];
-                            for (let i = 1; i < lines.length; i++) {
-                                const line = lines[i].replace(/\r/g, '').trim();
-                                if (!line) continue;
-                                const cols = line.split(',');
-                                if (cols.length >= 2) { 
-                                    let parsedDate = new Date(cols[0].trim());
-                                    if (isNaN(parsedDate.getTime())) continue;
-                                    const formattedDate = `${parsedDate.getFullYear()}-${String(parsedDate.getMonth()+1).padStart(2,'0')}-${String(parsedDate.getDate()).padStart(2,'0')}`;
-                                    
-                                    let fb=parseFloat(cols[1])||0, ig=parseFloat(cols[2])||0, tt=parseFloat(cols[3])||0, yt=parseFloat(cols[4])||0, tw=parseFloat(cols[5])||0;
-                                    let payload = { date: formattedDate, total: fb+ig+tt+yt+tw, platforms: { fb, ig, tt, yt, tw } };
-                                    const existingIdx = newHistory.findIndex(h => h.date === formattedDate);
-                                    if (existingIdx >= 0) newHistory[existingIdx] = payload;
-                                    else newHistory.push(payload);
-                                }
-                            }
-                            newHistory.sort((a,b) => new Date(a.date) - new Date(b.date));
-                            if (newHistory.length > 14) newHistory = newHistory.slice(-14);
-                            
-                            this.state.history = newHistory;
-                            this.saveState();
-                            this.showToast('CSV History imported. Reloading...');
-                            setTimeout(() => location.reload(), 1500);
-                        }
-                    }
-                } catch (err) { this.showToast('Error parsing CSV.', 'error'); }
-            }
-
-            async purgeData() {
-                if (confirm('CRITICAL ACTION: This will permanently delete your cloud data. Confirm?')) {
-                    if(this.currentUser) await deleteDoc(doc(db, "users", this.currentUser.uid));
-                    location.reload();
-                }
             }
         }
 
-        window.app = new WellnessApp();
+        function updateWeeklyStats() {
+            const container = document.getElementById('weekly-stats');
+            const weeklyData = window.appData.weeklyData;
+            
+            if (!window.hasData || weeklyData.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-text">No data available for statistical analysis.</div></div>`;
+            } else {
+                const avg = (weeklyData.reduce((a, b) => a + b, 0) / weeklyData.length).toFixed(1);
+                container.innerHTML = `
+                    <p style="color: var(--text-muted); font-size: 14px;"><strong>Daily Average:</strong> ${avg} hours</p>
+                    <p style="color: var(--text-muted); font-size: 14px;"><strong>Days Tracked:</strong> ${weeklyData.length} days</p>
+                `;
+            }
+        }
+
+        function updateCharts() {
+            const container = document.getElementById('charts-container');
+            const platformHistory = window.appData.platformHistory;
+
+            if (!window.hasData || platformHistory.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-text">Visualizations will appear once data is logged.</div></div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                    <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div style="background: white; padding: 20px; border: 1px solid var(--border); border-radius: 8px;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            `;
+            
+            drawCharts();
+        }
+
+        function drawCharts() {
+            if(window.activeCharts.bar) window.activeCharts.bar.destroy();
+            if(window.activeCharts.pie) window.activeCharts.pie.destroy();
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            const platformHistory = window.appData.platformHistory || [];
+            
+            let days = [];
+            let totals = [];
+            
+            if (platformHistory.length > 0) {
+                const recent = platformHistory.slice(-7);
+                days = recent.map(r => new Date(r.date).toLocaleDateString('en-US', {weekday: 'short'}));
+                totals = recent.map(r => r.total);
+            } else {
+                days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                totals = [0,0,0,0,0,0,0];
+            }
+
+            window.activeCharts.bar = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Total Screen Time (h)',
+                        data: totals,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: '7-Day Volume Trend', color: '#0f172a' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            let platformData = [0,0,0,0,0];
+            
+            if (platformHistory.length > 0) {
+                let pTotals = {fb:0, ig:0, tt:0, yt:0, tw:0};
+                platformHistory.forEach(r => {
+                    pTotals.fb += r.facebook || 0;
+                    pTotals.ig += r.instagram || 0;
+                    pTotals.tt += r.tiktok || 0;
+                    pTotals.yt += r.youtube || 0;
+                    pTotals.tw += r.twitter || 0;
+                });
+                platformData = [pTotals.fb, pTotals.ig, pTotals.tt, pTotals.yt, pTotals.tw];
+            }
+
+            window.activeCharts.pie = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Facebook', 'Instagram', 'TikTok', 'YouTube', 'Twitter/X'],
+                    datasets: [{
+                        data: platformData,
+                        backgroundColor: ['#1877F2', '#E4405F', '#000000', '#FF0000', '#1DA1F2']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { title: { display: true, text: 'Platform Distribution', color: '#0f172a' } }
+                }
+            });
+        }
+
+        const surveyQuestions = [
+            { question: "Sustained Attention: I find it difficult to focus on long-form media (e.g., reading a book) without checking short-form content.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Overstimulation Dependency: I require multiple streams of simultaneous stimulation to feel engaged.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Time Dysmorphia: I engage in 'infinite scrolling' longer than intended, frequently losing track of time.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Cognitive Fog: I experience mental exhaustion or memory lapses after social media sessions.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Digital Echolalia: Internet slang or memes involuntarily intrude into my thoughts or conversations.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Withdrawal Anxiety: I experience restlessness or phantom vibrations when separated from my devices.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] },
+            { question: "Sleep Displacement: I sacrifice planned sleep hours to consume algorithmic content.", options: ["Never", "Rarely", "Sometimes", "Frequently", "Almost Always"] }
+        ];
+
+        function initSurvey() {
+            window.surveyStep = 0;
+            window.surveyAnswers = {};
+            document.getElementById('result-container').classList.add('hidden');
+            document.getElementById('question-container').classList.remove('hidden');
+            document.getElementById('survey-navigation').classList.remove('hidden');
+            showSurveyQuestion();
+        }
+
+        function showSurveyQuestion() {
+            if (window.surveyStep < surveyQuestions.length) {
+                const question = surveyQuestions[window.surveyStep];
+                document.getElementById('question-text').textContent = `${window.surveyStep + 1}. ${question.question}`;
+                
+                const optionsContainer = document.getElementById('options-container');
+                optionsContainer.innerHTML = '';
+                
+                question.options.forEach((option, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = option;
+                    btn.dataset.index = index;
+                    if (window.surveyAnswers[window.surveyStep] === index) btn.classList.add('selected');
+                    btn.addEventListener('click', () => selectOption(index));
+                    optionsContainer.appendChild(btn);
+                });
+                
+                const progress = ((window.surveyStep + 1) / surveyQuestions.length) * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                updateNavigationState();
+            } else {
+                calculateBrainRotScore();
+                showSurveyResult();
+            }
+        }
+
+        function selectOption(index) {
+            window.surveyAnswers[window.surveyStep] = index;
+            document.querySelectorAll('#options-container .option-btn').forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.index, 10) === index);
+            });
+            updateNavigationState();
+            
+            setTimeout(() => {
+                if (window.surveyStep < surveyQuestions.length - 1) {
+                    window.surveyStep++;
+                    showSurveyQuestion();
+                } else {
+                    calculateBrainRotScore();
+                    showSurveyResult();
+                }
+            }, 200);
+        }
+        
+        window.goToPreviousQuestion = function() {
+            if (window.surveyStep > 0) { window.surveyStep--; showSurveyQuestion(); }
+        }
+        
+        window.goToNextQuestion = function() {
+            if (window.surveyAnswers[window.surveyStep] === undefined) return;
+            if (window.surveyStep < surveyQuestions.length - 1) { window.surveyStep++; showSurveyQuestion(); } 
+            else { calculateBrainRotScore(); showSurveyResult(); }
+        }
+        
+        function updateNavigationState() {
+            const prevBtn = document.getElementById('prev-question');
+            const nextBtn = document.getElementById('next-question');
+            prevBtn.disabled = window.surveyStep === 0;
+            nextBtn.textContent = (window.surveyStep === surveyQuestions.length - 1) ? 'View Results' : 'Next Question';
+            nextBtn.disabled = window.surveyAnswers[window.surveyStep] === undefined;
+        }
+
+        async function calculateBrainRotScore() {
+            let score = 0;
+            Object.values(window.surveyAnswers).forEach(answer => { score += answer; });
+            window.appData.brainRotScore = Math.round((score / 28) * 100);
+            window.hasData = true;
+            await window.saveDataToFirestore();
+            window.updateDashboard();
+        }
+
+        function showSurveyResult() {
+            document.getElementById('question-container').classList.add('hidden');
+            document.getElementById('result-container').classList.remove('hidden');
+            document.getElementById('survey-navigation').classList.add('hidden');
+            
+            const resultContainer = document.getElementById('result-container');
+            const score = window.appData.brainRotScore;
+            
+            let scoreClass = '', resultTitle = '', resultText = '';
+            if (score >= 80) {
+                scoreClass = 'high'; resultTitle = 'Critical Digital Dependency'; resultText = 'Severe cognitive overload detected.';
+            } else if (score >= 60) {
+                scoreClass = 'high'; resultTitle = 'Moderate Cognitive Fatigue'; resultText = 'Experiencing significant digital distraction.';
+            } else if (score >= 40) {
+                scoreClass = 'medium'; resultTitle = 'Mild Digital Distraction'; resultText = 'Early signs of digital fatigue.';
+            } else {
+                scoreClass = 'low'; resultTitle = 'Optimal Cognitive Health'; resultText = 'Excellent digital wellness boundary.';
+            }
+            
+            resultContainer.innerHTML = `
+                <div class="result-score ${scoreClass}">${score}%</div>
+                <h2 style="margin-bottom: 12px;">${resultTitle}</h2>
+                <p style="color: var(--text-muted); font-size: 15px; max-width: 400px; margin: 0 auto 24px;">${resultText}</p>
+                <button class="btn-primary" onclick="window.switchView('dashboard')">Return to Dashboard</button>
+            `;
+        }
+
+        window.renderAllChallenges = function() {
+            const container = document.getElementById('all-challenges');
+            container.innerHTML = '';
+            
+            window.appData.challenges.forEach(challenge => {
+                const item = document.createElement('div');
+                item.className = `challenge-item ${challenge.completed ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <div>
+                        <span class="challenge-name">${challenge.name}</span>
+                        <div class="challenge-subtitle">${challenge.subtitle}</div>
+                    </div>
+                    ${challenge.completed ? 
+                        '<span style="color: var(--success); font-weight: bold;">✓ Completed</span>' :
+                        `<button class="btn-complete" onclick="window.completeChallenge(${challenge.id})">Mark Complete</button>`
+                    }
+                `;
+                container.appendChild(item);
+            });
+            document.getElementById('challenge-points').textContent = window.appData.totalPoints;
+        }
+
+        window.completeChallenge = async function(id) {
+            const challenge = window.appData.challenges.find(c => c.id === id);
+            if (challenge && !challenge.completed) {
+                challenge.completed = true;
+                window.appData.totalPoints += challenge.points;
+                window.hasData = true;
+                await window.saveDataToFirestore();
+                window.renderAllChallenges();
+                window.updateDashboard();
+            }
+        }
+
+        const sliders = ['fb', 'ig', 'tt', 'yt', 'tw'];
+        sliders.forEach(platform => {
+            const slider = document.getElementById(`${platform}-slider`);
+            const value = document.getElementById(`${platform}-value`);
+            if (slider && value) {
+                slider.addEventListener('input', (e) => {
+                    value.textContent = e.target.value + 'h';
+                    updateTotalTime();
+                });
+            }
+        });
+
+        function updateTotalTime() {
+            let total = 0;
+            sliders.forEach(platform => {
+                const slider = document.getElementById(`${platform}-slider`);
+                if (slider) total += parseFloat(slider.value);
+            });
+            
+            document.getElementById('total-time').textContent = total.toFixed(1);
+            const warning = document.getElementById('time-warning');
+            
+            if (total === 0) { warning.textContent = 'Move sliders to track'; warning.style.color = '#94a3b8'; } 
+            else if (total > 4) { warning.textContent = '⚠️ High consumption volume. Risk of fatigue.'; warning.style.color = 'var(--danger)'; } 
+            else { warning.textContent = '✓ Volume within acceptable parameters.'; warning.style.color = 'var(--success)'; }
+        }
+
+        window.saveTrackerData = async function() {
+            let total = 0;
+            sliders.forEach(p => { total += parseFloat(document.getElementById(`${p}-slider`).value); });
+            
+            const date = new Date().toISOString().split('T')[0];
+            await processDailyData(date, 
+                parseFloat(document.getElementById('fb-slider').value),
+                parseFloat(document.getElementById('ig-slider').value),
+                parseFloat(document.getElementById('tt-slider').value),
+                parseFloat(document.getElementById('yt-slider').value),
+                parseFloat(document.getElementById('tw-slider').value),
+                total
+            );
+        }
+
+        window.showDailyInput = function() {
+            document.getElementById('dailyModal').classList.add('show');
+            document.getElementById('input-date').value = new Date().toISOString().split('T')[0];
+            ['facebook', 'instagram', 'tiktok', 'youtube', 'twitter'].forEach(p => {
+                document.getElementById(`input-${p}`).value = '';
+            });
+            updateModalTotal();
+        }
+        
+        window.closeDailyModal = function() { document.getElementById('dailyModal').classList.remove('show'); }
+        
+        function updateModalTotal() {
+            let total = 0;
+            ['facebook', 'instagram', 'tiktok', 'youtube', 'twitter'].forEach(p => {
+                total += parseFloat(document.getElementById(`input-${p}`).value) || 0;
+            });
+            document.getElementById('modal-total-time').textContent = total.toFixed(1) + 'h';
+        }
+
+        document.querySelectorAll('#dailyModal input[type="number"]').forEach(input => {
+            input.addEventListener('input', updateModalTotal);
+        });
+
+        window.saveDailyData = async function() {
+            const date = document.getElementById('input-date').value;
+            const fb = parseFloat(document.getElementById('input-facebook').value) || 0;
+            const ig = parseFloat(document.getElementById('input-instagram').value) || 0;
+            const tt = parseFloat(document.getElementById('input-tiktok').value) || 0;
+            const yt = parseFloat(document.getElementById('input-youtube').value) || 0;
+            const tw = parseFloat(document.getElementById('input-twitter').value) || 0;
+            const total = fb + ig + tt + yt + tw;
+            
+            if (total === 0) return;
+            await processDailyData(date, fb, ig, tt, yt, tw, total);
+            window.closeDailyModal();
+        }
+
+        async function processDailyData(date, fb, ig, tt, yt, tw, total) {
+            window.appData.todayUsage = parseFloat(total.toFixed(1));
+            window.appData.weeklyData.push(window.appData.todayUsage);
+            if (window.appData.weeklyData.length > 7) window.appData.weeklyData.shift();
+            
+            const platformData = { date, facebook: fb, instagram: ig, tiktok: tt, youtube: yt, twitter: tw, total };
+            if (!window.appData.platformHistory) window.appData.platformHistory = [];
+            
+            // Check if date exists, replace it
+            const existingIdx = window.appData.platformHistory.findIndex(h => h.date === date);
+            if(existingIdx >= 0) {
+                window.appData.platformHistory[existingIdx] = platformData;
+            } else {
+                window.appData.platformHistory.push(platformData);
+            }
+            
+            if (window.appData.platformHistory.length > 30) window.appData.platformHistory = window.appData.platformHistory.slice(-30);
+            
+            window.hasData = true;
+            await window.saveDataToFirestore();
+            window.updateDashboard();
+        }
+
+        window.exportAllData = function() {
+            const exportData = {
+                metadata: { appName: 'Digital Wellness Tracker', exportDate: new Date().toISOString() },
+                userData: window.appData
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `wellness-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
     </script>
 </body>
 </html>
