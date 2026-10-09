@@ -228,19 +228,30 @@
 </head>
 <body>
 
-    <!-- Auth Overlay -->
-    <div id="auth-screen" style="position: fixed; inset: 0; background: var(--bg-base); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-        <div class="glass-card" style="width: 100%; max-width: 400px; text-align: center;">
-            <div class="brand-icon" style="margin: 0 auto 16px; width: 48px; height: 48px; font-size: 24px; color: white;">⌘</div>
-            <h2 style="margin-bottom: 8px;">NeuroTracker</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 14px;">Đăng nhập để đồng bộ dữ liệu đám mây</p>
+   <!-- Auth Overlay -->
+    <div id="auth-screen" style="position: fixed; inset: 0; background: #f4f6f8; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; width: 100%; max-width: 400px; padding: 40px 32px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); text-align: center;">
             
-            <input type="email" id="auth-email" class="input-field" placeholder="Email" style="margin-bottom: 16px;">
-            <input type="password" id="auth-password" class="input-field" placeholder="Mật khẩu (từ 6 ký tự)" style="margin-bottom: 24px;">
+            <div style="margin: 0 auto 20px; width: 56px; height: 56px; background: #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white; font-weight: bold;">
+                ⌘
+            </div>
             
-            <button class="btn btn-primary" style="width: 100%; margin-bottom: 12px;" onclick="window.app.login()">Đăng nhập</button>
-            <button class="btn btn-outline" style="width: 100%;" onclick="window.app.signup()">Tạo tài khoản mới</button>
-            <div id="auth-error" style="color: var(--status-critical); font-size: 13px; margin-top: 16px; display: none;"></div>
+            <h2 style="margin-bottom: 8px; color: #0f172a; font-size: 24px; font-weight: 700;">NeuroTracker</h2>
+            <p style="color: #64748b; margin-bottom: 32px; font-size: 14px;">Đăng nhập để đồng bộ dữ liệu đám mây</p>
+            
+            <input type="email" id="auth-email" placeholder="Email" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 16px; color: #0f172a;">
+            <input type="password" id="auth-password" placeholder="Mật khẩu (từ 6 ký tự)" style="width: 100%; padding: 14px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; margin-bottom: 24px; color: #0f172a;">
+            
+            <button style="width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; margin-bottom: 12px;" onclick="window.app.login()" onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
+                Đăng nhập
+            </button>
+            <button style="width: 100%; padding: 14px; background: transparent; color: #3b82f6; border: 1px solid #3b82f6; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;" onclick="window.app.signup()" onmouseover="this.style.backgroundColor='#eff6ff'" onmouseout="this.style.backgroundColor='transparent'">
+                Tạo tài khoản mới
+            </button>
+            
+            <div id="auth-error" style="color: #ef4444; font-size: 13px; margin-top: 20px; display: none;">
+                <!-- Thông báo lỗi sẽ hiện ở đây -->
+            </div>
         </div>
     </div>
 
@@ -471,12 +482,13 @@
         // 🛑 QUAN TRỌNG: THAY BẰNG CONFIG CỦA BẠN VÀO ĐÂY
         // ==========================================
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "your-project.firebaseapp.com",
-            projectId: "your-project",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+              apiKey: "AIzaSyCEtd3iJxZNry_S6MTwRO9OBdEzWA51DZY",
+              authDomain: "neurotracker-swinburnehcmc.firebaseapp.com",
+              projectId: "neurotracker-swinburnehcmc",
+              storageBucket: "neurotracker-swinburnehcmc.firebasestorage.app",
+              messagingSenderId: "482706182439",
+              appId: "1:482706182439:web:b2a1149ccbe2656bead902",
+              measurementId: "G-3ZQPGBF1M4"
         };
 
         const firebaseApp = initializeApp(firebaseConfig);
